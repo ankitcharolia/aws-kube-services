@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bash-script
+data:
+  bash.sh: |
+    #!/bin/bash
+    apt-get update
+    apt-get install -y curl wget dnsutils net-tools iputils-ping telnet netcat
+---
+
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: solr-configset
+# binaryData:
+#   solr-configset.zip: {{ "./solr/etc/solr-configset.zip" | b64encode }}
+# ---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ubuntu
+  name: ubuntu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ubuntu
+    spec:
+      containers:
+      - image: ubuntu:22.04
+        name: ubuntu
+        command: ["/bin/sleep", "3650d"]
+        resources: {}
+        volumeMounts:
+          - mountPath: /data
+            name: bash-script
+          # - mountPath: /solr-configset
+          #   name: solr-configset
+      volumes:
+      - name: bash-script
+        configMap:
+          name: bash-script
+          defaultMode: 0777
+      # - name: solr-configset
+      #   configMap:
+      #     name: solr-configset
+
+
