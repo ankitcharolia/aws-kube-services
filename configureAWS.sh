@@ -1,1 +1,4 @@
-aws configure set {{ item.key }} {{ item.value }} --profile {{ aws_profile }}
+#!/bin/bash
+
+export AWS_PROFILE=aws-stage
+# export AWS_PROFILE=aws-prod

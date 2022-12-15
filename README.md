@@ -26,7 +26,11 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 | [External Secret Operator](https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets)  | 0.6.0  | v0.6.0  |
 | [ArgoCD](https://artifacthub.io/packages/helm/argo/argo-cd)  | 5.8.2  | v2.5.0  |
 
+## Useful Links
 
+* [AWS Workshop EKS](https://tf-eks-workshop.workshop.aws/000_workshop_introduction.html)
+* [AWS VPC Example](https://adamtheautomator.com/terraform-vpc/)
+* [AWS EKS Terraform Example](https://medium.com/devops-mojo/terraform-provision-amazon-eks-cluster-using-terraform-deploy-create-aws-eks-kubernetes-cluster-tf-4134ab22c594)
 
 ## TO DOs
 
