@@ -31,6 +31,7 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 * [AWS Workshop EKS](https://tf-eks-workshop.workshop.aws/000_workshop_introduction.html)
 * [AWS VPC Example](https://adamtheautomator.com/terraform-vpc/)
 * [AWS EKS Terraform Example](https://medium.com/devops-mojo/terraform-provision-amazon-eks-cluster-using-terraform-deploy-create-aws-eks-kubernetes-cluster-tf-4134ab22c594)
+* [Encrypted values.yaml with Terraform/Terragrunt](https://blog.gruntwork.io/a-comprehensive-guide-to-managing-secrets-in-your-terraform-code-1d586955ace1#4df5)
 
 ## TO DOs
 
