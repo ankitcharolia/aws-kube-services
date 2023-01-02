@@ -5,7 +5,8 @@ resource "aws_vpc" "vpc_network" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags = {
-    name = "${var.project}-${var.environment}-vpc",
+    name = "${var.project}-${var.environment}-vpc"
+    managedBy   = "Terraform"
   }
 }
 
@@ -23,6 +24,7 @@ resource "aws_subnet" "public_subnets" {
 
   tags = {
     name  = "${var.project}-${var.environment}-public-subnets"
+    managedBy   = "Terraform"
   }
   map_public_ip_on_launch = true
 }
@@ -37,6 +39,7 @@ resource "aws_subnet" "private_subnets" {
 
   tags    = {
     name  = "${var.project}-${var.environment}-private-subnets"
+    managedBy   = "Terraform"
   }
 }
 
@@ -46,6 +49,7 @@ resource "aws_internet_gateway" "this" {
 
   tags    = {
    name   = "${var.project}-${var.environment}-igw"
+   managedBy   = "Terraform"
   }
 }
 
@@ -60,7 +64,8 @@ resource "aws_route_table" "public_rt" {
    }
 
   tags = {
-    name = "${var.project}-${var.environment}-rt"
+    name = "${var.project}-${var.environment}-public-rt"
+    managedBy   = "Terraform"
   }
 }
 
@@ -75,11 +80,12 @@ resource "aws_route_table_association" "public_rt_association" {
 
 resource "aws_eip" "nat_eip" {
 
-  count  = availability_zones_count
+  count  = var.availability_zones_count
   vpc    = true
 
   tags   = {
     name = "${var.project}-${var.environment}-ngw-ip"
+    managedBy   = "Terraform"
   }
 }
 
@@ -91,15 +97,24 @@ resource "aws_nat_gateway" "nat_gw" {
 
   tags = {
     name = "${var.project}-${var.environment}-ngw"
+    managedBy   = "Terraform"
   }
 }
 
+# We created a route table with target as NAT gateway and Associate it to private subnet.
+# So that instances in private subnet can also connet to internet. 
+# request from instance inside private subnet goes to NAT gateway in public subnet and from NAT gateway it goes to Internet Gateway.
 # Route table for Private Subnets
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.vpc_network.id
   route {
     cidr_block      = "0.0.0.0/0"
     nat_gateway_id  = aws_nat_gateway.nat_gw.id
+  }
+
+  tags = {
+    name = "${var.project}-${var.environment}-private-rt"
+    managedBy   = "Terraform"
   }
 }
 
