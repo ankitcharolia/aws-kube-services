@@ -1,11 +1,13 @@
 # Create the VPC
 resource "aws_vpc" "vpc_network" {
-  cidr_block           = var.main_vpc_cidr
+
+  cidr_block           = var.vpc_cidr
   instance_tenancy     = "default"
   enable_dns_hostnames = true
   enable_dns_support   = true
+
   tags = {
-    name = "${var.project}-${var.environment}-vpc"
+    Name        = "${var.project}-${var.environment}-vpc"
     managedBy   = "Terraform"
   }
 }
@@ -23,7 +25,7 @@ resource "aws_subnet" "public_subnets" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    name  = "${var.project}-${var.environment}-public-subnets"
+    Name        = "${var.project}-${var.environment}-public-subnets"
     managedBy   = "Terraform"
   }
   map_public_ip_on_launch = true
@@ -33,23 +35,24 @@ resource "aws_subnet" "public_subnets" {
 resource "aws_subnet" "private_subnets" {
 
   count             = var.availability_zones_count
-  vpc_id            =  aws_vpc.vpc_network.id
+  vpc_id            = aws_vpc.vpc_network.id
   cidr_block        = cidrsubnet(var.vpc_cidr, var.subnet_cidr_bits, count.index + var.availability_zones_count)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags    = {
-    name  = "${var.project}-${var.environment}-private-subnets"
+    Name        = "${var.project}-${var.environment}-private-subnets"
     managedBy   = "Terraform"
   }
 }
 
 # Create Internet Gateway and attach it to VPC
 resource "aws_internet_gateway" "this" {
-  vpc_id  =  aws_vpc.vpc_network.id
+
+  vpc_id        =  aws_vpc.vpc_network.id
 
   tags    = {
-   name   = "${var.project}-${var.environment}-igw"
-   managedBy   = "Terraform"
+   Name         = "${var.project}-${var.environment}-igw"
+   managedBy    = "Terraform"
   }
 }
 
@@ -57,14 +60,14 @@ resource "aws_internet_gateway" "this" {
 # Route the public subnet traffic through the IGW
 resource "aws_route_table" "public_rt" {
 
-  vpc_id =  aws_vpc.vpc_network.id
+  vpc_id        =  aws_vpc.vpc_network.id
   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    cidr_block  = "0.0.0.0/0"
+    gateway_id  = aws_internet_gateway.this.id
    }
 
   tags = {
-    name = "${var.project}-${var.environment}-public-rt"
+    Name        = "${var.project}-${var.environment}-public-rt"
     managedBy   = "Terraform"
   }
 }
@@ -80,23 +83,22 @@ resource "aws_route_table_association" "public_rt_association" {
 
 resource "aws_eip" "nat_eip" {
 
-  count  = var.availability_zones_count
-  vpc    = true
+  vpc           = true
 
   tags   = {
-    name = "${var.project}-${var.environment}-ngw-ip"
+    Name        = "${var.project}-${var.environment}-ngw-ip"
     managedBy   = "Terraform"
   }
 }
 
 # Creating the NAT Gateway using subnet_id and allocation_id
 resource "aws_nat_gateway" "nat_gw" {
-  count         = availability_zones_count
-  allocation_id = aws_eip.nat_eip[count.index].id
-  subnet_id     = aws_subnet.public_subnets[count.index].id
+  
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public_subnets[0].id
 
   tags = {
-    name = "${var.project}-${var.environment}-ngw"
+    Name        = "${var.project}-${var.environment}-ngw"
     managedBy   = "Terraform"
   }
 }
@@ -106,6 +108,7 @@ resource "aws_nat_gateway" "nat_gw" {
 # request from instance inside private subnet goes to NAT gateway in public subnet and from NAT gateway it goes to Internet Gateway.
 # Route table for Private Subnets
 resource "aws_route_table" "private_rt" {
+
   vpc_id = aws_vpc.vpc_network.id
   route {
     cidr_block      = "0.0.0.0/0"
@@ -113,15 +116,24 @@ resource "aws_route_table" "private_rt" {
   }
 
   tags = {
-    name = "${var.project}-${var.environment}-private-rt"
-    managedBy   = "Terraform"
+    Name            = "${var.project}-${var.environment}-private-rt"
+    managedBy       = "Terraform"
   }
 }
 
 # Route table Association with Private Subnets
 resource "aws_route_table_association" "private_rt_association" {
 
-  count           = availability_zones_count
+  count           = var.availability_zones_count
   subnet_id       = aws_subnet.private_subnets[count.index].id
   route_table_id  = aws_route_table.private_rt.id
+}
+
+
+# Add route to default route table (that comes with VPC by default, no subnets attached, so can be ignored)
+resource "aws_route" "default_route" {
+
+  route_table_id         = aws_vpc.vpc_network.default_route_table_id
+  nat_gateway_id         = aws_nat_gateway.nat_gw.id
+  destination_cidr_block = "0.0.0.0/0"
 }
