@@ -34,3 +34,23 @@ variable "subnet_cidr_bits" {
   description = "The number of subnet bits for the CIDR"
   type        = number
 }
+
+# Route53 variables
+
+variable "public_zones" {
+  description = "Map of Route53 public zone parameters"
+  type        = any
+  default     = {}
+}
+
+variable "private_zones" {
+  description = "Map of Route53 private zone parameters"
+  type        = any
+  default     = {}
+}
+
+variable "delegation_set_id" {
+  description = "Map of Route53 delegation set parameters"
+  type        = any
+  default     = {}
+}
