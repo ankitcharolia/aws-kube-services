@@ -24,7 +24,7 @@ resource "aws_route53_record" "a_record" {
   name      = "${each.key}.${aws_route53_zone.public.name}"
   type      = "A"
   ttl       = "300"
-  records   = [each.value]
+  records   =  each.value
 }
 
 resource "aws_route53_record" "cname_record" {
@@ -33,7 +33,7 @@ resource "aws_route53_record" "cname_record" {
   name      = each.key
   type      = "CNAME"
   ttl       = "300"
-  records   = [each.value]
+  records   = each.value
 }
 
 resource "aws_route53_record" "nameserver" {

@@ -19,12 +19,12 @@ public_zone_tags = {
 }
 
 public_zone_a_records   = {
-    "test-1" = "10.0.1.1"
-    "test-2" = "10.0.2.1"
+    "test-1" = ["10.0.1.1"]
+    "test-2" = ["10.0.2.1"]
 }
 
 public_zone_cname_records = {
-    "test-3" = "test.example.com"
+    "test-3" = ["test.example.com"]
 }
 
 public_zone_nameservers = {
@@ -42,12 +42,12 @@ private_zone_tags = {
 }
 
 private_zone_a_records   = {
-    "test-5" = "10.0.5.1"
-    "test-6" = "10.0.6.1"
+    "test-5" = ["10.0.5.1"]
+    "test-6" = ["10.0.6.1"]
 }
 
 private_zone_cname_records = {
-    "test-7" = "private.example.com"
+    "test-7" = ["private.example.com"]
 }   
   
 private_zone_nameservers = {
