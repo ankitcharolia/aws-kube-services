@@ -36,21 +36,76 @@ variable "subnet_cidr_bits" {
 }
 
 # Route53 variables
+## Public DNS Zone Variables
 
-variable "public_zones" {
-  description = "Map of Route53 public zone parameters"
-  type        = any
+variable "public_zone_a_records" {
+  type        = map(any)
+  description = "A map with record name and IP address value."
   default     = {}
 }
 
-variable "private_zones" {
-  description = "Map of Route53 private zone parameters"
-  type        = any
+variable "public_zone_cname_records" {
+  type        = map(any)
+  description = "A map with record name and CNAME value."
   default     = {}
 }
 
-variable "delegation_set_id" {
-  description = "Map of Route53 delegation set parameters"
-  type        = any
+variable "public_zone_name" {
+  type        = string
+  description = "This is the name of the hosted zone"
+}
+
+variable "public_zone_comment" {
+  type        = string
+  description = "A comment for the hosted zone."
+  default     = null
+}
+
+variable "public_zone_tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the zone."
+  default = {}
+}
+
+variable "public_zone_nameservers" {
+  type        = map(any)
+  description = "A map with the subdomain name and a list of name servers that host the subzone configuration."
+  default     = {}
+}
+
+## Private DNS Zone Variables
+
+variable "private_zone_a_records" {
+  type        = map(any)
+  description = "A map with record name and IP address value."
+  default     = {}
+}
+
+variable "private_zone_cname_records" {
+  type        = map(any)
+  description = "A map with record name and CNAME value."
+  default     = {}
+}
+
+variable "private_zone_name" {
+  type        = string
+  description = "This is the name of the hosted zone"
+}
+
+variable "private_zone_comment" {
+  type        = string
+  description = "A comment for the hosted zone."
+  default     = null
+}
+
+variable "private_zone_tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the zone."
+  default = {}
+}
+
+variable "private_zone_nameservers" {
+  type        = map(any)
+  description = "A map with the subdomain name and a list of name servers that host the subzone configuration."
   default     = {}
 }
