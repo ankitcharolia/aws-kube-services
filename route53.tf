@@ -9,6 +9,7 @@ module "aws_public_route53" {
     public_zone_a_records     = var.public_zone_a_records
     public_zone_cname_records = var.public_zone_cname_records
     public_zone_nameservers   = var.public_zone_nameservers
+    public_zone_aliases       = var.public_zone_aliases
   depends_on = [
     module.aws_delegation_sets,
   ]
@@ -28,6 +29,7 @@ module "aws_private_route53" {
     private_zone_a_records      = var.private_zone_a_records
     private_zone_cname_records  = var.private_zone_cname_records
     private_zone_nameservers    = var.private_zone_nameservers
+    private_zone_aliases        = var.private_zone_aliases 
     region                      = var.region
 
   depends_on = [

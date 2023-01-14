@@ -45,10 +45,26 @@ resource "aws_route53_record" "cname_record" {
 resource "aws_route53_record" "nameserver" {
   for_each        = try(var.private_zone_nameservers, tomap({}))
   zone_id         = aws_route53_zone.private.zone_id
-  allow_overwrite = true
+  allow_overwrite = false
   name            = each.key
   type            = "NS"
   ttl             = "300"
   records         = each.value
 }
+
+resource "aws_route53_record" "private_alias" {
+  for_each      = { for alias in var.private_zone_aliases : alias.name => alias }
+
+  zone_id         = aws_route53_zone.private.zone_id
+  name            = each.value.name
+  allow_overwrite = try(each.value.allow_overwrite, false)
+  type            = each.value.type
+
+  alias {
+    name                   = each.value.alias_name
+    zone_id                = try(each.value.alias_zone_id, aws_route53_zone.private.zone_id)
+    evaluate_target_health = true
+  }
+}
+
 

@@ -50,3 +50,9 @@ variable "public_zone_nameservers" {
   description = "A map with the subdomain name and a list of name servers that host the subzone configuration."
   default     = {}
 }
+
+variable "public_zone_aliases" {
+  description = "List of Private Zone aliases"
+  type = any
+  default = []
+}

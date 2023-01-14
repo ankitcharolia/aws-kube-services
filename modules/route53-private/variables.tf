@@ -55,3 +55,9 @@ variable "vpc_id" {
   type        = list(string)
   default     = []
 }
+
+variable "private_zone_aliases" {
+  description = "List of Private Zone aliases"
+  type = any
+  default = []
+}

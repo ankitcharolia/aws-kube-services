@@ -45,3 +45,20 @@ resource "aws_route53_record" "nameserver" {
   ttl             = "300"
   records         = each.value
 }
+
+resource "aws_route53_record" "public_alias" {
+  for_each      = { for alias in var.public_zone_aliases : alias.name => alias }
+
+  zone_id         = aws_route53_zone.public.zone_id
+  name            = each.value.name
+  allow_overwrite = try(each.value.allow_overwrite, false)
+  type            = each.value.type
+
+  alias {
+    name                   = each.value.alias_name
+    zone_id                = try(each.value.alias_zone_id, aws_route53_zone.public.zone_id)
+    evaluate_target_health = true
+  }
+}
+
+

@@ -34,6 +34,15 @@ public_zone_nameservers = {
     ]
 }
 
+public_zone_aliases = [
+    {
+        "name"          = "cloud-storage"
+        "alias_zone_id" = "Z215JYRZR1TBD5"
+        "alias_name"    = "elb-ffm-dev-1741466132.eu-central-1.elb.amazonaws.com."
+        "type"          = "A"
+    }
+]
+
 # private zone configuration
 private_zone_name    = "private.local.com"   
 private_zone_comment = "private.local.com private hosted zone"
@@ -56,3 +65,14 @@ private_zone_nameservers = {
         "xyz.ns.com",
     ]
 }
+
+private_zone_aliases = [
+    {
+        "name"          = "cloudfront"
+        "alias_name"    = "elb-ffm-dev-1741466132.eu-central-1.elb.amazonaws.com."
+        "alias_zone_id" = "Z215JYRZR1TBD5"
+        "type"          = "A"
+    }
+]
+
+# IAM Config

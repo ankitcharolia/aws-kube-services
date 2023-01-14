@@ -73,6 +73,11 @@ variable "public_zone_nameservers" {
   default     = {}
 }
 
+variable "public_zone_aliases" {
+  description = "List of Private Zone aliases"
+  type = any
+}
+
 ## Private DNS Zone Variables
 
 variable "private_zone_a_records" {
@@ -108,4 +113,9 @@ variable "private_zone_nameservers" {
   type        = map(any)
   description = "A map with the subdomain name and a list of name servers that host the subzone configuration."
   default     = {}
+}
+
+variable "private_zone_aliases" {
+  description = "List of Private Zone aliases"
+  type = any
 }
