@@ -1,0 +1,6 @@
+policies:
+- name: "s3-read-only-policy"
+  description: "Allow to Read Objects within Buckets"
+
+- name: "s3-write-only-policy"
+  description: "Allow to Write Objects to Buckets"
