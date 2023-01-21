@@ -1,2 +1,9 @@
 groups:
-- name: ""
+- name: "test-dev"
+  policies:
+  - "rds-authenticate-policy"
+  - "s3-ro-policy"
+  - "s3-wo-policy"
+  policy_arns:
+  - "arn:aws:iam::aws:policy/PowerUserAccess"
+  - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"

@@ -1,0 +1,8 @@
+users:
+- name: "test"
+  groups:
+  - "test-dev"
+  policies:
+  - "s3-ro-policy"
+  policy_arns:
+  - "arn:aws:iam::aws:policy/AdministratorAccess"

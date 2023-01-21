@@ -1,6 +1,47 @@
 locals {
   policy_data = yamldecode(file("./etc/policies.yaml"))
   group_data = yamldecode(file("./etc/groups.yaml"))
+  user_data = yamldecode(file("./etc/users.yaml"))
+
+  group_policies  = flatten([for group in local.group_data.groups : [
+      for policy in try(group.policies, []) : {
+        name      = group.name
+        policy    = policy
+      }
+    ]
+  ])
+
+  group_policy_arns = flatten([for group in local.group_data.groups : [
+      for policy_arn in try(group.policy_arns, []) : {
+        name        = group.name
+        policy_arn  = policy_arn
+      }
+    ]
+  ])
+
+  user_groups = flatten([for user in local.user_data.users : [
+      for group in try(user.groups, []) : {
+        name      = user.name
+        groups    = group
+      }
+    ]
+  ])
+
+  user_policies  = flatten([for user in local.user_data.users : [
+      for policy in try(user.policies, []) : {
+        name      = user.name
+        policy    = policy
+      }
+    ]
+  ])
+
+  user_policy_arns = flatten([for user in local.user_data.users : [
+      for policy_arn in try(user.policy_arns, []) : {
+        name        = user.name
+        policy_arn  = policy_arn
+      }
+    ]
+  ])
 
 }
 
@@ -40,11 +81,13 @@ resource "aws_iam_policy" "policies" {
 
   name        = each.value.name
   path        = try(each.value.path, "/")
-  description = try(each.value.description, "")
-  policy      = file("./files/policies/${each.value.name}.json")
+  description = each.value.description
+  policy      = templatefile("./files/policies/${each.value.name}.json", {
+      aws_account_id = var.aws_account_id
+  })
 
   tags = {
-    PolicyDescription = "${each.value.description}"
+    PolicyDescription = each.value.description
   }
 
 }
@@ -61,3 +104,104 @@ resource "aws_iam_group" "groups" {
   path = try(each.value.path, "/")
 }
 
+# # Attach customer managed policies to group
+resource "aws_iam_group_policy_attachment" "policy_attachments" {
+  for_each =  { for idx, record in local.group_policies : idx => record }
+
+  group      = each.value.name
+  policy_arn = aws_iam_policy.policies[each.value.policy].arn
+
+  depends_on = [
+    aws_iam_group.groups,
+    aws_iam_policy.policies,
+  ]
+}
+
+# Attach policy ARNs to group
+resource "aws_iam_group_policy_attachment" "policy_arn_attachments" {
+  for_each =  { for idx, record in local.group_policy_arns : idx => record }
+
+  group      = each.value.name
+  policy_arn = each.value.policy_arn
+
+  depends_on = [aws_iam_group.groups]
+}
+
+# -------------------------------------------------------------------------------------------------
+# 4. Users
+# -------------------------------------------------------------------------------------------------
+
+# Create users
+resource "aws_iam_user" "users" {
+  for_each = { for user in local.user_data.users : user.name => user }
+
+  name = each.value.name
+  path = try(each.value.path, "/") 
+
+  # The boundary defines the maximum allowed permissions which cannot exceed.
+  # Even if the policy has higher permission, the boundary sets the final limit
+  permissions_boundary = try(each.value.permissions_boundary, null)
+
+  tags = {
+    Name = each.value.name
+  }
+}
+
+# Attach customer managed policies to user
+resource "aws_iam_user_policy_attachment" "policy_attachments" {
+  for_each =  { for idx, record in local.user_policies : idx => record }
+
+  user       = each.value.name
+  policy_arn = aws_iam_policy.policies[each.value.policy].arn
+
+  depends_on = [
+    aws_iam_user.users,
+    aws_iam_policy.policies,
+  ]
+}
+
+# Attach policy ARNs to user
+resource "aws_iam_user_policy_attachment" "policy_arn_attachments" {
+  for_each =  { for idx, record in local.user_policy_arns : idx => record }
+
+  user       = each.value.name
+  policy_arn = each.value.policy_arn
+
+  depends_on = [aws_iam_user.users]
+}
+
+# Add users to groups
+resource "aws_iam_user_group_membership" "group_membership" {
+  for_each =  { for idx, record in local.user_groups : idx => record }
+
+  user   = each.value.name
+  groups = [
+    each.value.groups,
+  ]
+  depends_on = [
+    aws_iam_user.users,
+    aws_iam_group.groups,
+  ]
+}
+
+# Uploads an SSH public key and associates it with the specified IAM user.
+resource "aws_iam_user_ssh_key" "user" {
+  for_each = { for user in local.user_data.users : user.name => user if can(user.ssh_key) }
+
+  username   = each.value.name
+  encoding   = "SSH"
+  public_key = try(each.value.ssh_key, "")
+}
+
+# Add 'Active' or 'Inactive' access key to an IAM user
+# resource "aws_iam_access_key" "access_key" {
+#   for_each = local.user_access_keys
+
+#   user    = split(":", each.key)[0]
+#   pgp_key = each.value.pgp_key
+#   status  = each.value.status
+
+#   Terraform has no info that aws_iam_users must be run first in order to create the users,
+#   so we must explicitly tell it.
+#   depends_on = [aws_iam_user.users]
+# }

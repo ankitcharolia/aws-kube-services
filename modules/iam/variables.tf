@@ -35,3 +35,7 @@ variable "account_pass_policy" {
     require_uppercase_characters   = null
   }
 }
+
+variable "aws_account_id" {
+  type  = string
+}

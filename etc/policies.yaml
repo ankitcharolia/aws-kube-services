@@ -1,6 +1,9 @@
 policies:
-- name: "s3-read-only-policy"
+- name: "s3-ro-policy"
   description: "Allow to Read Objects within Buckets"
 
-- name: "s3-write-only-policy"
+- name: "s3-wo-policy"
   description: "Allow to Write Objects to Buckets"
+  
+- name: "rds-authenticate-policy"
+  description: "Allow RDS Authetication"

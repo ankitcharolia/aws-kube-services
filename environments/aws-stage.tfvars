@@ -1,7 +1,8 @@
 # common variables
-project       = "heute"
-environment   = "stage"
-region        = "eu-west-1"
+project         = "heute"
+environment     = "stage"
+region          = "eu-west-1"
+aws_account_id  = "546716120898"
 
 # VPC Config
 enable_public_subnet      = true
