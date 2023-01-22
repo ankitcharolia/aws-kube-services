@@ -6,3 +6,4 @@ users:
   - "s3-ro-policy"
   policy_arns:
   - "arn:aws:iam::aws:policy/AdministratorAccess"
+  # pgp_key: "keybase:ankitcharolia91"

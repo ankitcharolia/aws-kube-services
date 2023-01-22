@@ -1,0 +1,7 @@
+roles:
+- name: test-role
+  description: "test role"
+  trust_policy_file: "files/policies/trust-policy.json"
+  policies: []
+  policy_arns: []
+

@@ -2,6 +2,7 @@ locals {
   policy_data = yamldecode(file("./etc/policies.yaml"))
   group_data = yamldecode(file("./etc/groups.yaml"))
   user_data = yamldecode(file("./etc/users.yaml"))
+  role_data = yamldecode(file("./etc/roles.yaml"))
 
   group_policies  = flatten([for group in local.group_data.groups : [
       for policy in try(group.policies, []) : {
@@ -38,6 +39,30 @@ locals {
   user_policy_arns = flatten([for user in local.user_data.users : [
       for policy_arn in try(user.policy_arns, []) : {
         name        = user.name
+        policy_arn  = policy_arn
+      }
+    ]
+  ])
+
+  user_login_profile = flatten([for user in local.user_data.users : [
+      for access_key in try(user.access_keys, []) : {
+        name      = user.name
+        pgp_key   = access_key.pgp_key
+      }
+    ]
+  ])
+
+  role_policies  = flatten([for role in local.role_data.roles : [
+      for policy in try(role.policies, []) : {
+        name      = role.name
+        policy    = policy
+      }
+    ]
+  ])
+
+  role_policy_arns = flatten([for role in local.role_data.roles : [
+      for policy_arn in try(role.policy_arns, []) : {
+        name        = role.name
         policy_arn  = policy_arn
       }
     ]
@@ -193,15 +218,66 @@ resource "aws_iam_user_ssh_key" "user" {
   public_key = try(each.value.ssh_key, "")
 }
 
-# Add 'Active' or 'Inactive' access key to an IAM user
-# resource "aws_iam_access_key" "access_key" {
-#   for_each = local.user_access_keys
+# Add IAM user login profile
+resource "aws_iam_user_login_profile" "user_profile" {
+  for_each = { for user in local.user_data.users : user.name => user }
 
-#   user    = split(":", each.key)[0]
-#   pgp_key = each.value.pgp_key
-#   status  = each.value.status
+  user                    = each.value.name
+  pgp_key                 = try(each.value.pgp_key, "")
+  password_reset_required = true
 
-#   Terraform has no info that aws_iam_users must be run first in order to create the users,
-#   so we must explicitly tell it.
-#   depends_on = [aws_iam_user.users]
+  depends_on = [aws_iam_user.users]
+}
+
+# -------------------------------------------------------------------------------------------------
+# 5. Roles
+# -------------------------------------------------------------------------------------------------
+
+# # Create roles
+# resource "aws_iam_role" "roles" {
+#   for_each = { for role in local.role_data.roles : role.name => role }
+
+#   name        = each.value.name
+#   path        = try(each.value.path, "/")
+#   description = try(each.value.description, null)
+
+#   # This policy defines who/what is allowed to use the current role
+#   assume_role_policy  = templatefile(each.value.trust_policy_file, {
+#     aws_account_id    = var.aws_account_id
+#   })
+
+#   # The boundary defines the maximum allowed permissions which cannot exceed.
+#   # Even if the policy has higher permission, the boundary sets the final limit
+#   permissions_boundary = try(each.value.permissions_boundary, null)
+
+#   # Allow session for X seconds
+#   max_session_duration  = try(each.value.role_max_session_duration, "3600")
+#   force_detach_policies = try(each.value.role_force_detach_policies, true)
+
+#   tags = {
+#     Name = each.value.name
+#   }
+# }
+
+# # Attach customer managed policies to roles
+# resource "aws_iam_role_policy_attachment" "policy_attachments" {
+#   for_each =  { for idx, record in local.role_policies : idx => record }
+
+#   role       = each.value.name
+#   policy_arn = aws_iam_policy.policies[each.value.policy].arn
+
+#   depends_on = [
+#     aws_iam_role.roles,
+#     aws_iam_policy.policies,
+#   ]
+# }
+
+# # Attach policy ARNs to roles
+# resource "aws_iam_role_policy_attachment" "policy_arn_attachments" {
+#   for_each =  { for idx, record in local.role_policy_arns : idx => record }
+
+#   role       = each.value.name
+#   policy_arn = each.value.policy_arn
+
+#   depends_on = [aws_iam_role.roles]
 # }
