@@ -33,8 +33,8 @@ provider "aws" {
 
   default_tags {
   tags = {
-    environment  = "stage"
-    team         = "infrastructure"
+    environment = "stage"
+    team        = "infrastructure"
     }
   }
 }

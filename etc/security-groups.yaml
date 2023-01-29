@@ -1,0 +1,16 @@
+security_groups:
+- name: test-sg
+  description: test security group
+  inbound_rules:
+  - from_port: 80
+    to_port: 80
+    protocol: tcp
+    cidr_blocks:
+    - 192.168.1.0/24
+    - 192.168.2.0/24
+  outbound_rules:
+  - from_port: 0
+    to_port: 0
+    protocol: -1
+    cidr_blocks:
+    - 0.0.0.0/0
