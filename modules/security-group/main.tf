@@ -13,12 +13,12 @@ locals {
   ])
 
   outbound_rules   = flatten([for security_group in local.security_group_data.security_groups : [
-      for outbound_rule in security_group.outbound_rules : {
+      for outbound_rule in try(security_group.outbound_rules, []) : {
         name        = security_group.name
-        from_port   = try(outbound_rule.from_port, 0)
-        to_port     = try(outbound_rule.to_port, 0)
-        protocol    = try(outbound_rule.protocol, "-1")
-        cidr_blocks = try(outbound_rule.cidr_blocks, ["0.0.0.0/0"])
+        from_port   = outbound_rule.from_port
+        to_port     = outbound_rule.to_port
+        protocol    = outbound_rule.protocol
+        cidr_blocks = outbound_rule.cidr_blocks
       }
     ]
   ])
@@ -32,7 +32,6 @@ resource "aws_security_group" "this" {
  
   tags = {
     Name        = each.value.name
-    environment = var.environment
     Project     = var.project
     ManagedBy   = "terraform"
   }
