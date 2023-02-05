@@ -1,2 +1,4 @@
 buckets:
-- name: achar-test
+- name: heute-test
+  versioning: false
+  logging: true
