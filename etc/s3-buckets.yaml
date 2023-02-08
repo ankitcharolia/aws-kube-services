@@ -1,4 +1,20 @@
 buckets:
 - name: heute-test
-  versioning: false
+  versioning: true
   logging: true
+  # bucket_policy: "bucket-policy.json"
+  lifecycle_rules:
+  - id: "rule-1"
+    status: "Enabled"
+    expiration:
+      days: "100"
+      # date: "2015-05-03"
+    noncurrent_version_transition:
+      days: "30"
+      storage_class: "STANDARD_IA"
+    transition:
+      days: "60"
+      storage_class: "STANDARD_IA"
+  # object_lock:
+  #   mode: COMPLIANCE
+  #   days: 1
