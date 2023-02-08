@@ -3,21 +3,22 @@ locals {
 
     lifecycle_rules = flatten([for bucket in local.s3_bucket_data.buckets : [
       for rule in try(bucket.lifecycle_rules, []) : {
-        name            = bucket.name
-        id              = rule.id
-        status          = rule.status
-        expiration_date = try(rule.expiration.date, null)
-        expiration_days = try(rule.expiration.days, null)
-        prefix                    = try(rule.prefix, null)
-        object_size_greater_than  = try(rule.object_size_greater_than, null)
-        object_size_less_than     = try(rule.object_size_less_than, null)
-        expiration_object_delete_marker     = try(rule.expiration.object_delete_marker, null)
-        noncurrent_version_expiration_days  = try(rule.noncurrent_version_expiration_days, null)
-        transition_date = try(rule.transition.date, null)
-        transition_days = try(rule.transition.days, null)
-        noncurrent_version_transition_days = try(rule.noncurrent_version_transition.days, null)
+        name                      = bucket.name
+        id                        = rule.id
+        status                    = rule.status
+        expiration_date           = try(rule.expiration.date, null)
+        expiration_days           = try(rule.expiration.days, null)
+        prefix                    = try(rule.filter.prefix, null)
+        object_size_greater_than  = try(rule.filter.object_size_greater_than, null)
+        object_size_less_than     = try(rule.filter.object_size_less_than, null)
+        transition_date           = try(rule.transition.date, null)
+        transition_days           = try(rule.transition.days, null)
+        transition_storage_class  = try(rule.transition.storage_class, null)
+
+        noncurrent_version_expiration_days          = try(rule.noncurrent_version_expiration.days, null)
+        expiration_object_delete_marker             = try(rule.expiration.object_delete_marker, null)
+        noncurrent_version_transition_days          = try(rule.noncurrent_version_transition.days, null)
         noncurrent_version_transition_storage_class = try(rule.noncurrent_version_transition.storage_class, null)
-        transition_storage_class = try(rule.transition.storage_class, null)
         }
       ]
   ]) 

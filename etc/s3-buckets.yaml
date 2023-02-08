@@ -9,6 +9,8 @@ buckets:
     expiration:
       days: "100"
       # date: "2015-05-03"
+    noncurrent_version_expiration:
+      days: "40"
     noncurrent_version_transition:
       days: "30"
       storage_class: "STANDARD_IA"
