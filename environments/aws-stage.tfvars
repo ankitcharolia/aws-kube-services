@@ -3,7 +3,6 @@
 project         = "heute"
 environment     = "stage"
 region          = "eu-west-1"
-aws_account_id  = "546716120898"
 
 # VPC Config
 # ----------------------------------------------------------------
@@ -101,5 +100,7 @@ account_pass_policy = {
 }
 
 # --------------------------------------------------------------------------------
-# Security Group Config
+# AWS KMS Config
 # --------------------------------------------------------------------------------
+use_aws_key_material    = false
+kms_alias               = "alias/secrets"

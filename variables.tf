@@ -16,9 +16,6 @@ variable "region" {
   description = "AWS Region Name"
 }
 
-variable "aws_account_id" {
-  type = string
-}
 # ----------------------------------------------------------------
 # VPC Variables
 # ----------------------------------------------------------------
@@ -165,4 +162,23 @@ variable "account_pass_policy" {
     require_symbols                = null
     require_uppercase_characters   = null
   }
+}
+
+# ----------------------------------------------------------------
+# AWS KMS Variables
+# ----------------------------------------------------------------
+variable "kms_alias" {
+  type          = string
+  description   = "The display name of the key."
+  default = ""
+  validation {
+    condition     = var.kms_alias == "" || can(regex("alias\\/.+", var.kms_alias))
+    error_message = "The name must start with the word 'alias' followed by a forward slash."
+  }
+}
+
+variable "use_aws_key_material" {
+  type          = bool
+  description   = "Whether to use AWS managed key materia or customer managed key material"
+  default       = false
 }

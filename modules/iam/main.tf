@@ -70,6 +70,9 @@ locals {
 
 }
 
+# get information about the AWS account
+data "aws_caller_identity" "current" {}
+
 # -------------------------------------------------------------------------------------------------
 # 1. Account Settings
 # -------------------------------------------------------------------------------------------------
@@ -108,7 +111,7 @@ resource "aws_iam_policy" "policies" {
   path        = try(each.value.path, "/")
   description = each.value.description
   policy      = templatefile("./files/policies/${each.value.name}.json", {
-      aws_account_id = var.aws_account_id
+      aws_account_id = data.aws_caller_identity.current.account_id
   })
 
   tags = {
@@ -243,7 +246,7 @@ resource "aws_iam_user_login_profile" "user_profile" {
 
 #   # This policy defines who/what is allowed to use the current role
 #   assume_role_policy  = templatefile(each.value.trust_policy_file, {
-#     aws_account_id    = var.aws_account_id
+#     aws_account_id    = data.aws_caller_identity.current.account_id
 #   })
 
 #   # The boundary defines the maximum allowed permissions which cannot exceed.
