@@ -31,7 +31,7 @@ resource "aws_kms_external_key" "this" {
   enabled                   = var.enabled
   # WARNING: key material will be stored in the raw state as plaintext.
   key_material_base64       = var.key_material_base64
-  policy                    = try(templatefile("./files/policies/aws-kms-${var.kms_alias}.json", {
+  policy                    = try(templatefile("./files/policies/aws-kms-${trimprefix(var.kms_alias, "alias/")}-policy.json", {
       aws_account_id = data.aws_caller_identity.current.account_id
   }), null)  
   tags                      =  {
