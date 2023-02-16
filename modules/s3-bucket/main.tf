@@ -6,19 +6,11 @@ locals {
         name                      = bucket.name
         id                        = rule.id
         status                    = rule.status
-        expiration_date           = try(rule.expiration.date, null)
-        expiration_days           = try(rule.expiration.days, null)
-        prefix                    = try(rule.filter.prefix, null)
-        object_size_greater_than  = try(rule.filter.object_size_greater_than, null)
-        object_size_less_than     = try(rule.filter.object_size_less_than, null)
-        transition_date           = try(rule.transition.date, null)
-        transition_days           = try(rule.transition.days, null)
-        transition_storage_class  = try(rule.transition.storage_class, null)
-
-        noncurrent_version_expiration_days          = try(rule.noncurrent_version_expiration.days, null)
-        expiration_object_delete_marker             = try(rule.expiration.object_delete_marker, null)
-        noncurrent_version_transition_days          = try(rule.noncurrent_version_transition.days, null)
-        noncurrent_version_transition_storage_class = try(rule.noncurrent_version_transition.storage_class, null)
+        filter                        = try(rule.filter, null)
+        transition                    = try(rule.transition, [])
+        expiration                    = try(rule.expiration, null)
+        noncurrent_version_transition = try(rule.noncurrent_version_transition, [])
+        noncurrent_version_expiration = try(rule.noncurrent_version_expiration, null)
         }
       ]
   ]) 
@@ -83,39 +75,53 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
 
   rule {
       id          = try(each.value.id, null)
-      prefix      = try(each.value.prefix, null)
       status      = each.value.status
 
-      filter {
-        and {
-          prefix                    = try(each.value.prefix, null)
-          object_size_greater_than  = try(each.value.object_size_greater_than, null)
-          object_size_less_than     = try(each.value.object_size_less_than, null)
+      dynamic "filter" {
+        for_each = each.value.filter == null ? [] : [each.value.filter]
+        content {
+          and {
+            prefix                    = try(filter.value.prefix, null)
+            object_size_greater_than  = try(filter.value.object_size_greater_than, null)
+            object_size_less_than     = try(filter.value.object_size_less_than, null)
+          }
         }
       }
       # Max 1 block - expiration
-      expiration {
-          date                         = try(each.value.expiration_date, null)
-          days                         = try(each.value.expiration_days, null)
-          expired_object_delete_marker = try(each.value.expiration_object_delete_marker, null)
+      dynamic "expiration" {
+        for_each = each.value.expiration == null ? [] : [each.value.expiration]
+        content {
+          date                         = try(expiration.value.date, null)
+          days                         = try(expiration.value.days, null)
+          expired_object_delete_marker = try(expiration.value.object_delete_marker, null)
+        }
       }
 
-      # Several blocks - transition, this terraform module is supporting only one block
-      transition {
-          date          = try(each.value.transition_date, null)
-          days          = try(each.value.transition_days, null)
-          storage_class = try(each.value.transition_storage_class, null)
+      # Several blocks - transition
+      dynamic "transition" {
+        for_each = try(each.value.transition, [])
+        content {
+          date          = try(transition.value.date, null)
+          days          = try(transition.value.days, null)
+          storage_class = try(transition.value.storage_class, null)
+        }
+      }
+
+      # Several blocks - noncurrent_version_transition
+      dynamic "noncurrent_version_transition" {
+        for_each = try(each.value.noncurrent_version_transition, [])
+        content {
+          noncurrent_days = try(noncurrent_version_transition.value.days, null)
+          storage_class   = try(noncurrent_version_transition.value.storage_class, null)
+        }
       }
 
       # Max 1 block - noncurrent_version_expiration
-      noncurrent_version_expiration {
-          noncurrent_days = try(each.value.noncurrent_version_expiration_days, null)
-      }
-
-      # Several blocks - noncurrent_version_transition, this terraform module is supporting only one block
-      noncurrent_version_transition {
-          noncurrent_days = try(each.value.noncurrent_version_transition_days, null)
-          storage_class   = try(each.value.noncurrent_version_transition_storage_class, null)
+      dynamic "noncurrent_version_expiration" {
+        for_each = each.value.noncurrent_version_expiration == null ? [] : [each.value.noncurrent_version_expiration]
+        content {
+          noncurrent_days = try(noncurrent_version_expiration.value.days, null)
+        }
       }
   }
   depends_on = [aws_s3_bucket_versioning.this]

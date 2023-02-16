@@ -6,17 +6,19 @@ buckets:
   lifecycle_rules:
   - id: "rule-1"
     status: "Enabled"
+    # filter:
+    #   prefix: "/"
+    transition:
+    - days: "60"
+      storage_class: "STANDARD_IA"
     expiration:
       days: "100"
       # date: "2015-05-03"
+    noncurrent_version_transition:
+    - days: "30"
+      storage_class: "STANDARD_IA"
     noncurrent_version_expiration:
       days: "40"
-    noncurrent_version_transition:
-      days: "30"
-      storage_class: "STANDARD_IA"
-    transition:
-      days: "60"
-      storage_class: "STANDARD_IA"
   # object_lock:
   #   mode: COMPLIANCE
   #   days: 1
