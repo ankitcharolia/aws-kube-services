@@ -1,12 +1,12 @@
 locals {
-  secret_data_content = yamldecode(data.aws_kms_secrets.this.plaintext["secrets"])
+  secret_data_content = nonsensitive(yamldecode(data.aws_kms_secrets.this.plaintext["secrets"]))
 }
 
 # Decrypt multiple secrets from data encrypted with the AWS KMS service
 data "aws_kms_secrets" "this" {
   secret {
     name = "secrets"
-    payload = file("./etc/secrets/${var.environment}.yaml.encrypted")
+    payload = filebase64("./etc/secrets/${var.environment}.yaml.encrypted")
   }
 }
 
