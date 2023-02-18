@@ -38,13 +38,18 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 * [IAM-Module-1](https://github.com/cytopia/terraform-aws-iam/tree/master)
 * [IAM-Module-2](https://gitlab.gluzdov.com/public-repos/terraform_modules/-/tree/master/terraform-aws-iam)
 
+* [Encrypt/Decrypt values/files with Terraform/Terragrunt](https://blog.gruntwork.io/a-comprehensive-guide-to-managing-secrets-in-your-terraform-code-1d586955ace1#4df5)
+
 ## TO DOs
 
 * VPC &#9989;
+* IAM &#9989;
 * Route53 &#9989;
+* EC2 &#9989;
 * EKS &#10060;
-* EC2 &#10060;
-* S3 &#10060;
 * Load Balancer &#10060;
-* IAM &#10060;
+* RDS &#9989;
+* S3 &#9989;
+* KMS &#9989;
+* AWS Secrets Manager &#9989;
 * Gitlab-CI &#10060;
