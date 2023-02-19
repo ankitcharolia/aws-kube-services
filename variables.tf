@@ -182,3 +182,9 @@ variable "use_aws_key_material" {
   description   = "Whether to use AWS managed key materia or customer managed key material"
   default       = false
 }
+
+variable "rds_instances" {
+  type        = any
+  description = "List of AWS RDS Instances"
+  default     = []
+}
