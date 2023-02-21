@@ -7,7 +7,12 @@ module "aws_rds" {
   environment = var.environment
   vpc_id      = module.aws_vpc.vpc_id
   subnet_ids  = module.aws_vpc.private_subnet_id
-  name        = each.value.name
+  name        = each.value.db_name
+  port        = each.value.db_port
+  cidr_blocks = each.value.db_cidr_blocks
+  family      = each.value.db_family
+  parameters  = each.value.db_parameters 
+  create_db_parameter_group = each.value.create_db_parameter_group
 
 
  depends_on = [

@@ -8,6 +8,22 @@ variable "environment" {
   description = "Environment Name"
 }
 
+variable "vpc_id" {
+  type        = string
+  description = "ID of the VPC"
+}
+
+variable "port" {
+  type        = number
+  description = "Port of RDS instance to connect"
+}
+
+variable "cidr_blocks" {
+  type        = any
+  description = "List of cidr blocks for the security group"
+  default     = []
+}
+
 ##############################################################################################################################################################
 # DB Subnet Group Variables
 ##############################################################################################################################################################

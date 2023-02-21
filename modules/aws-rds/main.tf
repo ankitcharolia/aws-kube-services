@@ -9,7 +9,7 @@ resource "aws_db_subnet_group" "this" {
   subnet_ids  = var.subnet_ids
 
   tags = {
-      "Name" = "${var.project}-${var.environment}-db-subnet-group"
+      Name = "${var.project}-${var.environment}-db-subnet-group"
     }
 
 }
@@ -101,6 +101,65 @@ resource "aws_security_group_rule" "this" {
   cidr_blocks       = var.cidr_blocks
 }
 
+# ----------------------------------------------------------------
+# ROOT USER AND PASSWORD SECTION
+# ----------------------------------------------------------------
+
+# password with random length
+resource "random_integer" "password_length" {
+
+  min = 25
+  max = 35
+}
+
+## ROOT PASSWORD
+resource "random_password" "root_password" {
+
+  length           = random_integer.password_length.result
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # CREATE THE DATABASE INSTANCE
 # ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_db_instance" "this" {
+  identifier              = var.name
+  engine                  = var.engine_name
+  engine_version          = var.engine_version
+  port                    = var.port
+  name                    = var.database_name
+  username                = var.username
+  password                = random_password.root_password.result
+  instance_class          = var.instance_class
+  allocated_storage       = var.allocated_storage
+  skip_final_snapshot     = true
+  license_model           = var.license_model
+  db_subnet_group_name    = aws_db_subnet_group.this.id
+  vpc_security_group_ids  = ["${aws_security_group.db_instance_sg.id}"]
+  publicly_accessible     = false
+  parameter_group_name    = aws_db_parameter_group.this.id
+  option_group_name       = aws_db_option_group.this.id
+
+  tags {
+    Name = var.name
+  }
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# STORE THE RDS INSTANCE PASSWORD TO AWS SECRETS MANAGER
+# ---------------------------------------------------------------------------------------------------------------------
+
+# create AWS secrets manager secret ID
+resource "aws_secretsmanager_secret" "this" {
+
+  name = AWS_RDS_${upper(replace(var.database_instance_name, "-", "_"))}_PASSWORD
+}
+
+# store secret key data to AWS secrets manager secret ID
+resource "aws_secretsmanager_secret_version" "this" {
+
+  secret_id     = aws_secretsmanager_secret.this.id
+  secret_string = random_password.root_password.result
+}
