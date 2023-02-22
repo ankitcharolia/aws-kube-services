@@ -124,12 +124,14 @@ resource "random_password" "root_password" {
 # CREATE THE DATABASE INSTANCE
 # ---------------------------------------------------------------------------------------------------------------------
 
+# Find Engine and EngineVersion: aws rds describe-db-engine-versions  --query 'DBEngineVersions[*].{Engine:Engine,EngineVersion:EngineVersion}' | grep -A 2 '"Engine": "mysql"'
+
 resource "aws_db_instance" "this" {
   identifier              = var.name
-  engine                  = var.engine_name
+  engine                  = var.engine
   engine_version          = var.engine_version
   port                    = var.port
-  name                    = var.database_name
+  db_name                 = var.db_name
   username                = var.username
   password                = random_password.root_password.result
   instance_class          = var.instance_class
@@ -139,8 +141,8 @@ resource "aws_db_instance" "this" {
   db_subnet_group_name    = aws_db_subnet_group.this.id
   vpc_security_group_ids  = ["${aws_security_group.db_instance_sg.id}"]
   publicly_accessible     = false
-  parameter_group_name    = aws_db_parameter_group.this.id
-  option_group_name       = aws_db_option_group.this.id
+  parameter_group_name    = try(aws_db_parameter_group.this.id, null)
+  option_group_name       = try(aws_db_option_group.this.id, null)
 
   tags {
     Name = var.name
@@ -154,7 +156,7 @@ resource "aws_db_instance" "this" {
 # create AWS secrets manager secret ID
 resource "aws_secretsmanager_secret" "this" {
 
-  name = AWS_RDS_${upper(replace(var.database_instance_name, "-", "_"))}_PASSWORD
+  name = "AWS_RDS_${upper(replace(aws_db_instance.this.identifier, "-", "_"))}_${upper(replace(aws_db_instance.this.username, "-", "_"))}_PASSWORD"
 }
 
 # store secret key data to AWS secrets manager secret ID

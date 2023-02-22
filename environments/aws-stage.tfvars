@@ -110,16 +110,20 @@ kms_alias               = "alias/secrets"
 # --------------------------------------------------------------------------------
 rds_instances   = [
     {
-        db_name             = "heute-landingpage"
-        db_engine_name      =
-        db_engine_version   =
-        db_port             = "3306"
-        db_cidr_blocks = [
+        name                    = "heute-landingpage"
+        engine                  = "mysql"
+        engine_version          = "8.0.32"
+        port                    = "3306"
+        db_name                 = "heute"
+        username                = "root"
+        allocated_storage       = "5"
+        max_allocated_storage   = "10"
+        cidr_blocks = [
             "10.0.0.0/16",
         ]
-        db_family           = "mariadb10.6"
+        family           = "mysql8.0"
         create_db_parameter_group   = true
-        db_parameters   = [
+        parameters   = [
             {
                 name    = "general_log"
                 value   = "1"
