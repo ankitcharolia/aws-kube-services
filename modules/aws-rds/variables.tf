@@ -48,10 +48,10 @@ variable "create_db_parameter_group" {
   default     = false
 }
 
-variable "name" {
-  description = "The name of the Database"
-  type        = string
-  default     = ""
+variable "create_db_instance_replica" {
+  description = "Whether to create replica of DB instance"
+  type        = bool
+  default     = false
 }
 
 variable "family" {
@@ -113,7 +113,7 @@ variable "max_allocated_storage" {
 variable "storage_type" {
   description = "One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD). The default is 'io1' if iops is specified, 'standard' if not. Note that this behaviour is different from the AWS web console, where the default is 'gp2'."
   type        = string
-  default     = null
+  default     = "gp2"
 }
 
 variable "storage_encrypted" {
@@ -173,10 +173,10 @@ variable "engine_version" {
 variable "instance_class" {
   description = "The instance type of the RDS instance. Reference: https://aws.amazon.com/rds/instance-types/"
   type        = string
-  default     = "db.t2.micro"
+  default     = "db.t3.micro"
 }
 
-variable "name" {
+variable "db_name" {
   description = "The DB name to create. If omitted, no database is created initially"
   type        = string
   default     = null
@@ -200,8 +200,102 @@ variable "port" {
   default     = null
 }
 
-variable "db_name" {
-  description = "The DB name to create. If omitted, no database is created initially"
+variable "auto_minor_version_upgrade" {
+  description = "Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window"
+  type        = bool
+  default     = true
+}
+
+variable "apply_immediately" {
+  description = "Specifies whether any database modifications are applied immediately, or during the next maintenance window"
+  type        = bool
+  default     = false
+}
+
+variable "maintenance_window" {
+  description = "The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00'"
+  type        = string
+  default     = "Mon:00:00-Mon:04:00"
+}
+
+variable "timeouts" {
+  description = "(Optional) Updated Terraform resource management timeouts. Applies to `aws_db_instance` in particular to permit resource management times"
+  type        = map(string)
+  default = {
+    create = "40m"
+    update = "80m"
+    delete = "40m"
+  }
+}
+
+variable "backup_retention_period" {
+  description = "The days to retain backups for"
+  type        = number
+  default     = null
+}
+
+variable "backup_window" {
+  description = "The daily time range (in UTC) during which automated backups are created if they are enabled. Example: '09:46-10:16'. Must not overlap with maintenance_window"
+  type        = string
+  default     = "07:00-09:00"
+}
+
+variable "enabled_cloudwatch_logs_exports" {
+  description = "List of log types to enable for exporting to CloudWatch logs. If omitted, no logs will be exported. Valid values (depending on engine): alert, audit, error, general, listener, slowquery, trace, postgresql (PostgreSQL), upgrade (PostgreSQL)."
+  type        = list(string)
+  default     = []
+}
+
+variable "deletion_protection" {
+  description = "The database can't be deleted when this value is set to true."
+  type        = bool
+  default     = false
+}
+
+variable "multi_az" {
+  description = "Specifies if the RDS instance is multi-AZ"
+  type        = bool
+  default     = true
+}
+
+variable "performance_insights_enabled" {
+  description = "Specifies whether Performance Insights are enabled"
+  type        = bool
+  default     = false
+}
+
+variable "performance_insights_retention_period" {
+  description = "The amount of time in days to retain Performance Insights data. Either 7 (7 days) or 731 (2 years)."
+  type        = number
+  default     = 7
+}
+
+variable "performance_insights_kms_key_id" {
+  description = "The ARN for the KMS key to encrypt Performance Insights data."
   type        = string
   default     = null
+}
+
+variable "monitoring_role_arn" {
+  description = "The ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. Must be specified if monitoring_interval is non-zero."
+  type        = string
+  default     = null
+}
+
+variable "monitoring_role_name" {
+  description = "Name of the IAM role which will be created when create_monitoring_role is enabled."
+  type        = string
+  default     = "rds-monitoring-role"
+}
+
+variable "create_monitoring_role" {
+  description = "Create IAM role with a defined name that permits RDS to send enhanced monitoring metrics to CloudWatch Logs."
+  type        = bool
+  default     = false
+}
+
+variable "monitoring_interval" {
+  description = "The interval in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60."
+  type        = number
+  default     = 0
 }

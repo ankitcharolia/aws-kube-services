@@ -108,9 +108,10 @@ kms_alias               = "alias/secrets"
 # --------------------------------------------------------------------------------
 # AWS RDS Config
 # --------------------------------------------------------------------------------
+# RDS Instance Engine Version reference: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MySQL.Concepts.VersionMgmt.html 
 rds_instances   = [
     {
-        name                    = "heute-landingpage"
+        identifier              = "heute-landingpage"
         engine                  = "mysql"
         engine_version          = "8.0.32"
         port                    = "3306"
@@ -122,13 +123,18 @@ rds_instances   = [
             "10.0.0.0/16",
         ]
         family           = "mysql8.0"
-        create_db_parameter_group   = true
-        parameters   = [
-            {
-                name    = "general_log"
-                value   = "1"
-            }
-        ]
-        
+        # parameters   = [
+        #     {
+        #         name    = "general_log"
+        #         value   = "1"
+        #     }
+        # ]
+        create_db_parameter_group   = false
+        create_db_instance_replica  = true
+        backup_retention_period     = 1
+        # DB subnet group is not necessary for master-replica setup. set to FALSE
+        create_db_subnet_group      = true
+        deletion_protection         = true 
+        apply_immediately           = true       
     }
 ]
