@@ -191,6 +191,11 @@ resource "aws_db_instance" "master" {
 resource "aws_secretsmanager_secret" "this" {
 
   name = "AWS_RDS_${upper(replace(aws_db_instance.master.identifier, "-", "_"))}_${upper(replace(aws_db_instance.master.username, "-", "_"))}_PASSWORD"
+
+  depends_on = [
+    aws_db_instance.master,
+  ]
+
 }
 
 # store secret key data to AWS secrets manager secret ID
@@ -296,5 +301,9 @@ resource "aws_db_instance" "replica" {
     delete = lookup(var.timeouts, "delete", null)
     update = lookup(var.timeouts, "update", null)
   }
+
+  depends_on = [
+    aws_db_instance.master,
+  ]
 
 }
