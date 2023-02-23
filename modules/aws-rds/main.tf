@@ -12,12 +12,12 @@ data "aws_partition" "current" {}
 resource "aws_db_subnet_group" "this" {
   count = var.create_db_subnet_group ? 1 : 0
 
-  name        = "${var.project}-${var.environment}-db-subnet-group"
-  description = "DB Subnet Group for ${var.environment} Environment"
+  name        = "${var.identifier}-db-subnet-group"
+  description = "DB Subnet Group for ${var.identifier}"
   subnet_ids  = var.subnet_ids
 
   tags = {
-      Name = "${var.project}-${var.environment}-db-subnet-group"
+      Name = "${var.identifier}-db-subnet-group"
     }
 
 }

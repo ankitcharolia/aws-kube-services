@@ -113,6 +113,7 @@ rds_instances   = [
     {
         identifier              = "heute-landingpage"
         engine                  = "mysql"
+        # aws rds describe-db-engine-versions --default-only --engine mysql
         engine_version          = "8.0.32"
         port                    = "3306"
         db_name                 = "heute"
@@ -134,7 +135,35 @@ rds_instances   = [
         backup_retention_period     = 1
         # DB subnet group is not necessary for master-replica setup. set to FALSE
         create_db_subnet_group      = true
-        deletion_protection         = true 
+        deletion_protection         = false
+        apply_immediately           = true
+    },
+    {
+        identifier              = "heute-web"
+        engine                  = "postgres"
+        # aws rds describe-db-engine-versions --default-only --engine postgre
+        engine_version          = "14.6"
+        port                    = "5432"
+        db_name                 = "heute"
+        username                = "postgres"
+        allocated_storage       = "5"
+        max_allocated_storage   = "10"
+        cidr_blocks = [
+            "10.0.0.0/16",
+        ]
+        family           = "postgres14"
+        # parameters   = [
+        #     {
+        #         name    = "general_log"
+        #         value   = "1"
+        #     }
+        # ]
+        create_db_parameter_group   = false
+        create_db_instance_replica  = true
+        backup_retention_period     = 1
+        # DB subnet group is not necessary for master-replica setup. set to FALSE
+        create_db_subnet_group      = true
+        deletion_protection         = false
         apply_immediately           = true       
     }
 ]
