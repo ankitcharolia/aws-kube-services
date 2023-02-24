@@ -191,6 +191,9 @@ resource "aws_db_instance" "master" {
 resource "aws_secretsmanager_secret" "this" {
 
   name = "AWS_RDS_${upper(replace(aws_db_instance.master.identifier, "-", "_"))}_${upper(replace(aws_db_instance.master.username, "-", "_"))}_PASSWORD"
+  # Number of days that AWS Secrets Manager waits before it can delete the secret.
+  # This value can be 0 to force deletion. Default is 30 days
+  recovery_window_in_days = 0
 
   depends_on = [
     aws_db_instance.master,
@@ -261,6 +264,7 @@ resource "aws_db_instance" "replica" {
   username                        = null
   password                        = null
   
+  availability_zone               = "${var.region}b"
   instance_class                  = var.instance_class
   allocated_storage               = var.allocated_storage
   max_allocated_storage           = var.max_allocated_storage

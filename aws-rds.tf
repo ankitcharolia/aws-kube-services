@@ -4,6 +4,7 @@ module "aws_rds" {
   source = "./modules/aws-rds"
 
   project                       = var.project
+  region                        = var.region
   environment                   = var.environment
   vpc_id                        = module.aws_vpc.vpc_id
   subnet_ids                    = module.aws_vpc.private_subnet_id
