@@ -131,7 +131,7 @@ rds_instances   = [
         #     }
         # ]
         create_db_parameter_group   = false
-        create_db_instance_replica  = true
+        create_db_instance_replica  = false
         backup_retention_period     = 1
         # DB subnet group is not necessary for master-replica setup. set to FALSE
         create_db_subnet_group      = true
@@ -159,7 +159,7 @@ rds_instances   = [
         #     }
         # ]
         create_db_parameter_group   = false
-        create_db_instance_replica  = true
+        create_db_instance_replica  = false
         backup_retention_period     = 1
         # DB subnet group is not necessary for master-replica setup. set to FALSE
         create_db_subnet_group      = true
