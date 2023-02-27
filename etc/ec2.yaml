@@ -7,3 +7,12 @@ ec2_instances:
   tags:
     Name: "bastion-host-01"
     app: "proxy-host"
+
+- name: "Test-01"
+  description: "Test-01 Instance"
+  instance_type: "t2.micro"
+  availability_zone: "eu-west-1a"
+  create_extra_disk: false
+  tags:
+    Name: "test-01"
+    app: "proxy-host"
