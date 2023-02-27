@@ -1,0 +1,9 @@
+ec2_instances:
+- name: "bastion-host-01"
+  description: "Bastion Host Instance"
+  instance_type: "t2.micro"
+  availability_zone: "eu-west-1a"
+  create_extra_disk: true
+  tags:
+    Name: "bastion-host-01"
+    app: "proxy-host"
