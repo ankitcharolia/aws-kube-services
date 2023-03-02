@@ -16,7 +16,9 @@ resource "aws_ebs_volume" "this" {
   size              = try(each.value.storage_disk_size, var.storage_disk_size)
   type              = try(each.value.storage_disk_type, var.storage_disk_type)
   encrypted         = var.ebs_volume_encrypted
-  tags              = try(each.value.tags, null)
+  tags = {
+    "Name" = "${each.value.name}-data-disk"
+  }
 }
 
 # TODO
@@ -92,6 +94,9 @@ resource "aws_instance" "this" {
     delete_on_termination = var.delete_on_termination
     encrypted             = var.root_block_device_encrypted
     kms_key_id            = var.root_block_device_kms_key_id
+    tags = {
+      "Name" = "${each.value.name}-root-disk"
+    }
   }
 
   metadata_options {

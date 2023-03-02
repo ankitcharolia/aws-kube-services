@@ -12,7 +12,7 @@ variable "create_extra_disk" {
 variable "boot_disk_size" {
   type        = string
   description = "The size in GB of the OS boot volume. (Default: 30GB)"
-  default     = "30"
+  default     = "20"
 }
 
 variable "storage_disk_size" {
@@ -102,7 +102,7 @@ variable "root_volume_type" {
 variable "root_volume_size" {
   type        = number
   description = "Size of the root volume in gigabytes"
-  default     = 20
+  default     = 30
 }
 
 variable "ebs_volume_encrypted" {
