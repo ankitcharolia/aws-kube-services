@@ -129,3 +129,32 @@ variable "delete_on_termination" {
   default     = true
 }
 
+variable "metadata_http_tokens_required" {
+  type        = bool
+  default     = false
+  description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2."
+}
+
+variable "metadata_http_endpoint_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether the metadata service is available"
+}
+
+variable "metadata_tags_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether the tags are enabled in the metadata service."
+}
+
+variable "metadata_http_put_response_hop_limit" {
+  type        = number
+  default     = 2
+  description = "The desired HTTP PUT response hop limit (between 1 and 64) for instance metadata requests."
+}
+
+variable "vpc_security_group_ids" {
+  description = "A list of security group IDs to associate with"
+  type        = list(string)
+  default     = null
+}

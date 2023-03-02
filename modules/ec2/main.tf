@@ -81,6 +81,10 @@ resource "aws_instance" "this" {
   associate_public_ip_address = try(each.value.associate_public_ip_address, var.associate_public_ip_address)
   monitoring                  = try(each.value.monitoring, var.monitoring)
   subnet_id                   = var.subnet_id
+  user_data                   = var.user_data
+#  key_name                    = var.ssh_key_pair
+
+  vpc_security_group_ids      = var.vpc_security_group_ids
 
   root_block_device {
     volume_type           = try(each.value.root_volume_type ,var.root_volume_type)
@@ -88,6 +92,13 @@ resource "aws_instance" "this" {
     delete_on_termination = var.delete_on_termination
     encrypted             = var.root_block_device_encrypted
     kms_key_id            = var.root_block_device_kms_key_id
+  }
+
+  metadata_options {
+    http_endpoint               = var.metadata_http_endpoint_enabled ? "enabled" : "disabled"
+    instance_metadata_tags      = var.metadata_tags_enabled ? "enabled" : "disabled"
+    http_put_response_hop_limit = var.metadata_http_put_response_hop_limit
+    http_tokens                 = var.metadata_http_tokens_required ? "required" : "optional"
   }
 
   # don't force-recreate instance if only user data changes
@@ -112,3 +123,11 @@ resource "aws_eip" "this" {
     aws_instance.this,
   ]
 }
+
+resource "aws_ec2_instance_state" "this" {
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
+
+  instance_id = aws_instance.this[each.key].id
+  state       = try(each.value.instance_state, "running")
+}
+
