@@ -1,6 +1,16 @@
 variable "subnet_id" {
-  type        = string
   description = "VPC Subnet ID the instance is launched in"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
+variable "project" {
+  description = "project name"
+  type        = string
 }
 
 variable "create_extra_disk" {
@@ -30,7 +40,7 @@ variable "storage_disk_type" {
 variable "ssh_key_pair" {
   type        = string
   description = "SSH key pair to be provisioned on the instance"
-  default     = null
+  default     = "acharolia"
 }
 
 variable "associate_public_ip_address" {

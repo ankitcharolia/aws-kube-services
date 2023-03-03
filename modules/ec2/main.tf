@@ -6,6 +6,66 @@
 
 locals {
   yaml_data = yamldecode(file("./etc/ec2.yaml"))
+
+  inbound_rules   = flatten([for instance in local.yaml_data.ec2_instances : [
+      for inbound_rule in try(instance.sg_inbound_rules, []) : {
+        name        = instance.name
+        from_port   = inbound_rule.port
+        to_port     = inbound_rule.port
+        protocol    = inbound_rule.protocol
+        cidr_blocks = inbound_rule.cidr_blocks
+      }
+    ]
+  ])
+
+  outbound_rules   = flatten([for instance in local.yaml_data.ec2_instances : [
+      for outbound_rule in try(instance.sg_outbound_rules, []) : {
+        name        = instance.name
+        from_port   = try(outbound_rule.port, 0)
+        to_port     = try(outbound_rule.port, 0)
+        protocol    = try(outbound_rule.protocol, -1)
+        cidr_blocks = try(outbound_rule.cidr_blocks, ["0.0.0.0/0"])
+      }
+    ]
+  ])
+}
+
+resource "aws_security_group" "this" {
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if instance.create_extra_disk }
+
+  name          = "${each.value.name}-sg"
+  description   = "${each.value.name}-security-group"
+  vpc_id        = var.vpc_id
+ 
+  tags = {
+    Name        = "${each.value.name}-sg"
+    Project     = var.project
+    ManagedBy   = "terraform"
+  }
+}
+
+resource "aws_security_group_rule" "ingress" {
+  for_each =  { for idx, record in local.inbound_rules : idx => record }
+
+  type              = "ingress"
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+  cidr_blocks       = try(each.value.cidr_blocks, null)
+  security_group_id = aws_security_group.this[each.value.name].id
+  # source_security_group_id and cidr_blocks can not be specified together
+  source_security_group_id  = try(each.value.source_security_group_id, null)
+}
+
+resource "aws_security_group_rule" "egress" {
+  for_each =  { for idx, record in local.outbound_rules : idx => record }
+
+  type        = "egress"
+  from_port   = each.value.from_port
+  to_port     = each.value.from_port
+  protocol    = each.value.protocol
+  cidr_blocks = each.value.cidr_blocks
+  security_group_id = aws_security_group.this[each.value.name].id
 }
 
 # Create additional disk volume for EC2 instance
@@ -21,9 +81,8 @@ resource "aws_ebs_volume" "this" {
   }
 }
 
-# TODO
 # Attach additional disk to instance, so that we can move this volume to another instance if needed later.
-# This will appear at /dev/disk/by-id/-{NAME}
+# Linux kernels may rename your devices to /dev/xvdf through /dev/xvdp internally, even when the device name is /dev/sdf 
 resource "aws_volume_attachment" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if instance.create_extra_disk }
 
@@ -38,8 +97,8 @@ resource "aws_network_interface" "this" {
   for_each  = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
   description = "Primary Network Interface for ${each.value.name}"
-  subnet_id = var.subnet_id
-  tags      = try(each.value.tags, null)
+  subnet_id   = var.subnet_id
+  tags        = try(each.value.tags, null)
 }
 
 # Attach the primary network interface to the VM
@@ -72,6 +131,13 @@ data "aws_ami" "this" {
   owners = ["099720109477"] # Canonical
 }
 
+# resource "random_shuffle" "subnet" {
+#   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
+
+#   input        = [module.aws_vpc.public_subnet_id[0], module.aws_vpc.public_subnet_id[1]]
+#   result_count = 1
+# }
+
 # Create a Amazon EC2 instance
 resource "aws_instance" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
@@ -84,9 +150,9 @@ resource "aws_instance" "this" {
   monitoring                  = try(each.value.monitoring, var.monitoring)
   subnet_id                   = var.subnet_id
   user_data                   = var.user_data
-#  key_name                    = var.ssh_key_pair
+  key_name                    = var.ssh_key_pair
 
-  vpc_security_group_ids      = var.vpc_security_group_ids
+  vpc_security_group_ids      = try([aws_security_group.this[each.value.name].id], null)
 
   root_block_device {
     volume_type           = try(each.value.root_volume_type ,var.root_volume_type)

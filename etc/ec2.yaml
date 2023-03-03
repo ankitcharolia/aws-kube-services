@@ -1,11 +1,16 @@
 ec2_instances:
 - name: "bastion-host-01"
   description: "Bastion Host Instance"
-  ami_id: "ami-098ecf49881aa75bf"   # ubuntu2204 packer ami
+  ami_id: "ami-0277dc178ff7fb80f"   # ubuntu2204 packer ami
   instance_type: "t2.micro"
   availability_zone: "eu-west-1a"
+  associate_public_ip_address: true
   disable_api_termination: true
   create_extra_disk: true
+  sg_inbound_rules:
+  - port: 22
+    protocol: "tcp"
+    cidr_blocks: ["0.0.0.0/0"]
   tags:
     Name: "bastion-host-01"
     app: "proxy-host"
@@ -13,7 +18,7 @@ ec2_instances:
 - name: "Test-01"
   description: "Test-01 Instance"
   instance_type: "t2.micro"
-  ami_id: "ami-098ecf49881aa75bf" # ubuntu2204 packer ami
+  ami_id: "ami-0277dc178ff7fb80f" # ubuntu2204 packer ami
   availability_zone: "eu-west-1a"
   disable_api_termination: true
   create_extra_disk: false
