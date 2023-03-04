@@ -33,8 +33,9 @@ provider "aws" {
 
   default_tags {
   tags = {
-    environment = "stage"
+    environment = var.environment
     team        = "infrastructure"
+    ManagedBy   = "Terraform"
     }
   }
 }

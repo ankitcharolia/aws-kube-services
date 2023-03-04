@@ -31,7 +31,7 @@ locals {
 }
 
 resource "aws_security_group" "this" {
-  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if instance.create_extra_disk }
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
   name          = "${each.value.name}-sg"
   description   = "${each.value.name}-security-group"
@@ -39,8 +39,6 @@ resource "aws_security_group" "this" {
  
   tags = {
     Name        = "${each.value.name}-sg"
-    Project     = var.project
-    ManagedBy   = "terraform"
   }
 }
 
@@ -92,27 +90,17 @@ resource "aws_volume_attachment" "this" {
   stop_instance_before_detaching    = true
 }
 
-# Create the primary network interface to the VM
+# Add the additional network interface to the VM
 resource "aws_network_interface" "this" {
   for_each  = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
-  description = "Primary Network Interface for ${each.value.name}"
-  subnet_id   = var.subnet_id
-  tags        = try(each.value.tags, null)
-}
-
-# Attach the primary network interface to the VM
-resource "aws_network_interface_attachment" "this" {
-  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
-
-  instance_id          = aws_instance.this[each.key].id
-  network_interface_id = aws_network_interface.this[each.key].id
-  device_index         = 0
-
-  depends_on = [
-    aws_instance.this,
-    aws_network_interface.this,
-  ]
+  description     = "Primary Network Interface for ${each.value.name}"
+  subnet_id       = var.subnet_id
+  # security_groups are assigned to network interfaces, no instance
+  security_groups = try([aws_security_group.this[each.value.name].id], null)
+  tags      = merge(try(each.value.tags, null), {
+    Name    = "${each.value.name}"
+  })
 }
 
 data "aws_ami" "this" {
@@ -146,13 +134,11 @@ resource "aws_instance" "this" {
   instance_type               = try(each.value.instance_type, var.instance_type)
   availability_zone           = each.value.availability_zone
   disable_api_termination     = try(each.value.disable_api_termination, var.disable_api_termination)
-  associate_public_ip_address = try(each.value.associate_public_ip_address, var.associate_public_ip_address)
   monitoring                  = try(each.value.monitoring, var.monitoring)
-  subnet_id                   = var.subnet_id
   user_data                   = var.user_data
   key_name                    = var.ssh_key_pair
 
-  vpc_security_group_ids      = try([aws_security_group.this[each.value.name].id], null)
+  # vpc_security_group_ids      = try([aws_security_group.this[each.value.name].id], null)
 
   root_block_device {
     volume_type           = try(each.value.root_volume_type ,var.root_volume_type)
@@ -163,6 +149,11 @@ resource "aws_instance" "this" {
     tags = {
       "Name" = "${each.value.name}-root-disk"
     }
+  }
+
+  network_interface {
+    network_interface_id  = aws_network_interface.this[each.key].id
+    device_index          = 0
   }
 
   metadata_options {
@@ -179,13 +170,17 @@ resource "aws_instance" "this" {
     ]
   }
 
-  tags      = try(each.value.tags, null)
+  tags      = merge(try(each.value.tags, null), {
+    Name    = "${each.value.name}.${var.dns_name}" 
+  })
 
 }
 
 # Create an Elastic IP for the instance
+# when map_public_ip_on_launch is true in VPC public subnet , the instance will automatically get public IP.
+# this resource is useless when map_public_ip_on_launch is true
 resource "aws_eip" "this" {
-  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.associate_public_ip_address, false) }
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.assign_eip, false) }
 
   vpc         = true
   instance    = aws_instance.this[each.key].id
@@ -202,3 +197,13 @@ resource "aws_ec2_instance_state" "this" {
   state       = try(each.value.instance_state, "running")
 }
 
+# Create a DNS record
+resource "aws_route53_record" "a_record" {
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
+
+  zone_id   = var.zone_id
+  name      = "${each.value.name}.${var.dns_name}"
+  type      = "A"
+  ttl       = "300"
+  records   =  [aws_instance.this[each.key].private_ip]
+}

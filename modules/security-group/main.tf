@@ -32,8 +32,6 @@ resource "aws_security_group" "this" {
  
   tags = {
     Name        = each.value.name
-    Project     = var.project
-    ManagedBy   = "terraform"
   }
 }
 

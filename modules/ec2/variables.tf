@@ -168,3 +168,13 @@ variable "vpc_security_group_ids" {
   type        = list(string)
   default     = null
 }
+
+variable "zone_id" {
+  type        = string
+  description = "Route53 zone ID to associate"
+}
+
+variable "dns_name" {
+  type        = string
+  description = "Public DNS name to associate with"
+}

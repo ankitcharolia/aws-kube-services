@@ -15,7 +15,7 @@ resource "aws_route53_zone" "private" {
     force_destroy   = var.force_destroy
 
     tags  = merge(var.private_zone_tags, {
-      managedBy   = "Terraform"
+      # managedBy   = "Terraform"
     })
 
 }
