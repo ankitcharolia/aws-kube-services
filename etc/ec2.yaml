@@ -17,19 +17,3 @@ ec2_instances:
   tags:
     app: "proxy-host"
 
-# - name: "test-01"
-#   description: "Test-01 Instance"
-#   instance_type: "t2.micro"
-#   ami_id: "ami-0277dc178ff7fb80f" # ubuntu2204 packer ami
-#   availability_zone: "eu-west-1a"
-#   disable_api_termination: true
-#   sg_inbound_rules:
-#   - port: 22
-#     protocol: "tcp"
-#     cidr_blocks: ["0.0.0.0/0"]
-#   sg_outbound_rules:
-#   - port: 0
-#     protocol: -1
-#     cidr_blocks: ["0.0.0.0/0"]
-#   tags:
-#     app: "proxy-host"
