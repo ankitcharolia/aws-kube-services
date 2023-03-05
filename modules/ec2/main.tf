@@ -68,7 +68,7 @@ resource "aws_security_group_rule" "egress" {
 
 # Create additional disk volume for EC2 instance
 resource "aws_ebs_volume" "this" {
-  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if instance.create_extra_disk }
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.create_extra_disk, false) }
 
   availability_zone = try(each.value.availability_zone, null)
   size              = try(each.value.storage_disk_size, var.storage_disk_size)
@@ -82,7 +82,7 @@ resource "aws_ebs_volume" "this" {
 # Attach additional disk to instance, so that we can move this volume to another instance if needed later.
 # Linux kernels may rename your devices to /dev/xvdf through /dev/xvdp internally, even when the device name is /dev/sdf 
 resource "aws_volume_attachment" "this" {
-  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if instance.create_extra_disk }
+  for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.create_extra_disk, false) }
 
   device_name                       = "/dev/sdb"
   volume_id                         = try(each.value.create_extra_disk ? aws_ebs_volume.this[each.key].id : null, null)
@@ -135,8 +135,8 @@ resource "aws_instance" "this" {
   availability_zone           = each.value.availability_zone
   disable_api_termination     = try(each.value.disable_api_termination, var.disable_api_termination)
   monitoring                  = try(each.value.monitoring, var.monitoring)
-  user_data                   = var.user_data
   key_name                    = var.ssh_key_pair
+  user_data                   = file("./etc/cloud-init/initialize.sh")
 
   # vpc_security_group_ids      = try([aws_security_group.this[each.value.name].id], null)
 
@@ -147,7 +147,7 @@ resource "aws_instance" "this" {
     encrypted             = var.root_block_device_encrypted
     kms_key_id            = var.root_block_device_kms_key_id
     tags = {
-      "Name" = "${each.value.name}-root-disk"
+      Name = "${each.value.name}-root-disk"
     }
   }
 
@@ -171,7 +171,9 @@ resource "aws_instance" "this" {
   }
 
   tags      = merge(try(each.value.tags, null), {
-    Name    = "${each.value.name}.${var.dns_name}" 
+    Name              = "${each.value.name}.${var.dns_name}"
+    create_extra_disk = try(each.value.create_extra_disk, false)
+    mount_dir         = try(each.value.mount_dir, "/var/opt")
   })
 
 }
