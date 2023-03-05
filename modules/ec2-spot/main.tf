@@ -1,5 +1,5 @@
 ###############################################################################
-# AWS EC2 Instance Module                                              #
+# AWS EC2 SPOT Instance Module                                                #
 # ----------------------------------------------------------------------------#
 # main.tf                                                                     #
 ###############################################################################
@@ -90,19 +90,6 @@ resource "aws_volume_attachment" "this" {
   stop_instance_before_detaching    = true
 }
 
-# # Add the additional network interface to the VM
-# resource "aws_network_interface" "this" {
-#   for_each  = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
-
-#   description     = "Primary Network Interface for ${each.value.name}"
-#   subnet_id       = var.subnet_id
-#   # security_groups are assigned to network interfaces, no instance
-#   security_groups = try([aws_security_group.this[each.value.name].id], null)
-#   tags      = merge(try(each.value.tags, null), {
-#     Name    = "${each.value.name}"
-#   })
-# }
-
 data "aws_ami" "this" {
   most_recent = true
 
@@ -146,11 +133,6 @@ resource "aws_spot_instance_request" "this" {
       Name = "${each.value.name}-root-disk"
     }
   }
-
-  # network_interface {
-  #   network_interface_id  = aws_network_interface.this[each.key].id
-  #   device_index          = 0
-  # }
 
   metadata_options {
     http_endpoint               = var.metadata_http_endpoint_enabled ? "enabled" : "disabled"
