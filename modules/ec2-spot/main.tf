@@ -145,6 +145,7 @@ resource "aws_spot_instance_request" "this" {
   lifecycle {
     ignore_changes = [
       user_data,
+      root_block_device,
     ]
   }
 

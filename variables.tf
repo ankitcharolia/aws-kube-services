@@ -183,8 +183,17 @@ variable "use_aws_key_material" {
   default       = false
 }
 
+# ----------------------------------------------------------------
+# AWS RDS Variables
+# ----------------------------------------------------------------
 variable "rds_instances" {
   type        = any
   description = "List of AWS RDS Instances"
   default     = []
+}
+
+variable "bucket" {
+  description = "Name of bucket"
+  type        = string
+  default     = null
 }
