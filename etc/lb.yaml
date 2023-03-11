@@ -1,0 +1,15 @@
+application_loadbalancers:
+- name: "web-app"
+  listeners:
+  - port: 80
+    type: "forward"
+    protocol: "HTTP"
+    rules:
+  target_groups:
+  - name: "nginx-app"
+    port: 80
+    path: "/"
+    protocol: "HTTP"
+    target_instances:
+    - "test-01.public.local.com"
+
