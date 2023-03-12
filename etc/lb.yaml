@@ -1,18 +1,18 @@
-application_loadbalancers:
-- name: "web-app"
-  listeners:
-  - port: 80
-    type: "forward"
-    protocol: "HTTP"
-    rules:
-    - name: "host_header"
-      action_type: "forward"
-      host_header: "web-app-alb-537475121.eu-west-1.elb.amazonaws.com"
-  target_groups:
-  - name: "nginx-app"
-    port: 80
-    path: "/"
-    protocol: "HTTP"
-    target_instances:
-    - "test-01.public.local.com"
+application_loadbalancers: []
+# - name: "web-app"
+#   listeners:
+#   - port: 80
+#     type: "forward"
+#     protocol: "HTTP"
+#     rules:
+#     - name: "host_header"
+#       action_type: "forward"
+#       host_header: "web-app-alb-537475121.eu-west-1.elb.amazonaws.com"
+#   target_groups:
+#   - name: "nginx-app"
+#     port: 80
+#     path: "/"
+#     protocol: "HTTP"
+#     target_instances:
+#     - "test-01.public.local.com"
 

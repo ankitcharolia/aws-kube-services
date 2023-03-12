@@ -126,7 +126,7 @@ resource "aws_lb_target_group" "alb-target-group" {
 
 
 data "aws_instance" "this" {
-  for_each =  { for idx, record in local.target_groups : idx => record }
+  for_each =  { for idx, record in local.target_groups : idx => record if try(can(record.target_instance), false) }
 
   filter {
     name = "tag:Name"
@@ -136,7 +136,7 @@ data "aws_instance" "this" {
 
 # Attach EC2 Instances to Application Load Balancer Target Group
 resource "aws_alb_target_group_attachment" "alb-target-group-attach" {
-  for_each =  { for idx, record in local.target_groups : idx => record }
+  for_each =  { for idx, record in local.target_groups : idx => record if try(can(record.target_instance), false) }
 
   target_group_arn = aws_lb_target_group.alb-target-group[each.key].arn
   target_id        = data.aws_instance.this[each.key].id
