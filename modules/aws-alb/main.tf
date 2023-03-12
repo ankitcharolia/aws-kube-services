@@ -7,24 +7,14 @@ locals {
 
   listeners = flatten([for alb in local.yaml_data.application_loadbalancers : [
     for listener in try(alb.listeners, []) : {
-      name      = alb.name
-      port      = listener.port 
-      type      = listener.type
-      protocol  = listener.protocol
+        name        = alb.name
+        port        = listener.port
+        type        = listener.type
+        protocol    = listener.protocol
+        rules       = try(listener.rules, [])
       }
     ]
   ])
-
-  # target_groups = flatten([for alb in local.yaml_data.application_loadbalancers : [
-  #   for target_group in try(alb.target_groups, []) : {
-  #     lb_name           = alb.name
-  #     target_name       = target_group.name
-  #     target_port       = target_group.port 
-  #     target_path       = target_group.path
-  #     target_protocol   = target_group.protocol
-  #     }
-  #   ]
-  # ])
 
   target_groups = flatten([for alb in local.yaml_data.application_loadbalancers : [
     for target_group in try(alb.target_groups, []) : [
@@ -154,7 +144,7 @@ resource "aws_alb_target_group_attachment" "alb-target-group-attach" {
 }
 
 # Create the Application Load Balancer Listener
-resource "aws_lb_listener" "alb-listener" {  
+resource "aws_lb_listener" "alb_listener" {
   for_each =  { for idx, record in local.listeners : idx => record }
   
   load_balancer_arn = aws_lb.alb[each.value.name].arn
@@ -172,28 +162,92 @@ resource "aws_lb_listener" "alb-listener" {
   ]
 }
 
-# # ######################################
+# Create the Application Load Balancer Listener Rules
+resource "aws_alb_listener_rule" "listener_rule" {
+  for_each =  { for idx, record in local.listeners : idx => record if try(record.rules != [] && can(record.rules), false) }
 
-# # Reference to the AWS Route53 Public Zone
-# data "aws_route53_zone" "public-zone" {
-#   name         = var.public_dns_name
-#   private_zone = false
-# }
+  listener_arn = aws_lb_listener.alb_listener[each.key].arn
 
-# # Create AWS Route53 A Record for the Load Balancer
-# resource "aws_route53_record" "linux-alb-a-record" {
-#   depends_on = [aws_lb.linux-alb]
+  dynamic "action" {
+    for_each = try(each.value.rules, [])
+    content {
+      type             = action.value.action_type
+      target_group_arn = aws_lb_target_group.alb-target-group[each.key].arn
+    }
+  }
 
-#   zone_id = data.aws_route53_zone.public-zone.zone_id
-#   name    = "${var.dns_hostname}.${var.public_dns_name}"
-#   type    = "A"
+  # Host header condition
+  dynamic "condition" {
+    for_each = { for rule in each.value.rules : rule.name => rule if rule.name == "host_header" }
+    content {
+      host_header {
+        values = [condition.value.host_header]
+      }
+    }
+  }
 
-#   alias {
-#     name                   = aws_lb.linux-alb.dns_name
-#     zone_id                = aws_lb.linux-alb.zone_id
-#     evaluate_target_health = true
-#   }
-# }
+  # Http header condition
+  dynamic "condition" {
+    for_each = { for rule in each.value.rules : rule.name => rule if rule.name == "http_header" }
+
+    content {
+      http_header {
+        http_header_name  = condition.value.http_header_name
+        values            = [condition.value.values]
+      }
+    }
+  }
+
+  # Query String condition
+  dynamic "condition" {
+    for_each = { for rule in each.value.rules : rule.name => rule if rule.name == "query_string" }
+
+    content {
+      query_string {
+        key     = condition.value.query_string_key
+        value   = condition.value.query_string_value
+      }
+    }
+  }
+
+  # # Path Pattern condition
+  dynamic "condition" {
+    for_each = { for rule in each.value.rules : rule.name => rule if rule.name == "path_pattern" }
+
+    content {
+      path_pattern {
+        values   = [condition.value.path_pattern]
+      }
+    }
+  }
+
+}
+
+# Reference to the AWS Route53 Public Zone
+data "aws_route53_zone" "public_zone" {
+  name         = var.public_zone_name
+  private_zone = false
+}
+
+# Create AWS Route53 A Record for the Load Balancer
+resource "aws_route53_record" "alb-a-record" {
+  for_each = { for alb in local.yaml_data.application_loadbalancers : alb.name => alb }
+
+  zone_id = data.aws_route53_zone.public_zone.zone_id
+  name    = "elb.${var.public_zone_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.alb[each.value.name].dns_name
+    zone_id                = aws_lb.alb[each.value.name].zone_id
+    evaluate_target_health = true
+  }
+
+  depends_on = [
+    aws_lb.alb,
+  ]
+
+}
 
 # # ######################################
 

@@ -14,3 +14,8 @@ variable "bucket" {
   type = string
   default = null
 }
+
+variable "public_zone_name" {
+  type        = string
+  description = "This is the name of the hosted zone"
+}

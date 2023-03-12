@@ -5,6 +5,9 @@ application_loadbalancers:
     type: "forward"
     protocol: "HTTP"
     rules:
+    - name: "host_header"
+      action_type: "forward"
+      host_header: "web-app-alb-537475121.eu-west-1.elb.amazonaws.com"
   target_groups:
   - name: "nginx-app"
     port: 80
