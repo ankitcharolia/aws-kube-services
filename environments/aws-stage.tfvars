@@ -167,3 +167,53 @@ rds_instances   = [
     #     apply_immediately           = true       
     # }
 ]
+
+# --------------------------------------------------------------------------------
+# AWS EKS Config
+# --------------------------------------------------------------------------------
+
+kubernetes_version  = "1.24"
+eks_node_groups = [
+  {
+    node_group_name   = "main"
+    desired_size      = 2
+    min_size          = 2
+    max_size          = 10
+
+    labels = {
+      role = "main"
+    }
+
+    instance_types    = ["t3.medium"]
+    capacity_type     = "ON_DEMAND"
+    max_unavailable   =   1
+  },
+  {
+    node_group_name   = "spot"
+    desired_size      = 2
+    min_size          = 2
+    max_size          = 10
+
+    labels = {
+      role = "spot"
+    }
+
+    taints = [
+    {
+        key    = "gitlab-runner"
+        value  = "true"
+        effect = "NO_SCHEDULE"
+    }
+    ]
+
+    instance_types    = ["t3.micro"]
+    capacity_type     = "SPOT"
+    max_unavailable   =   1
+  }
+]
+
+aws_eks_addons  = [
+    "coredns",
+    "vpc-cni",
+    "kube-proxy"
+]
