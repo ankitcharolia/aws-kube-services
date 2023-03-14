@@ -46,10 +46,10 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 * IAM &#9989;
 * Route53 &#9989;
 * EC2 &#9989;
-* EKS &#10060;
-* Load Balancer &#10060;
+* EKS &#9989;
+* Load Balancer &#9989;
 * RDS &#9989;
 * S3 &#9989;
 * KMS &#9989;
 * AWS Secrets Manager &#9989;
-* Gitlab-CI &#10060;
+* Gitlab-CI &#9989;
