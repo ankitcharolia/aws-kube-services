@@ -32,5 +32,6 @@ variable "kubernetes_version" {
 }
 
 variable "aws_eks_addons" {
-  type = set(string)
+  type        = set(string)
+  default     = []
 }

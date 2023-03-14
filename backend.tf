@@ -10,15 +10,15 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "4.55.0"
+      version = "4.58.0"
     }
     helm = {
       source = "hashicorp/helm"
-      version = "2.7.1"
+      version = "2.9.0"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
-      version = "2.16.0"
+      version = "2.18.1"
     }
     kubectl = {
       source = "alekc/kubectl"
@@ -56,15 +56,22 @@ data "aws_eks_cluster_auth" "this" {
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.this.token
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
 }
 
 
 provider "helm" {
   kubernetes {
     host                   = data.aws_eks_cluster.this.endpoint
-    cluster_ca_certificate = base64decode(aws_eks_cluster.this.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.this.token
+    cluster_ca_certificate = base64decode(aws_eks_cluster.this.certificate_authority[0].data)
   }
+}
+
+provider "kubectl" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  token                  = data.aws_eks_cluster_auth.this.token
+  cluster_ca_certificate = base64decode(aws_eks_cluster.this.certificate_authority[0].data)
+  load_config_file       = false
 }
