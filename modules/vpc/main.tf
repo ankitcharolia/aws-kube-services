@@ -26,6 +26,7 @@ resource "aws_subnet" "public_subnets" {
 
   tags = {
     Name        = "${var.project}-${var.environment}-public-subnets"
+    "kubernetes.io/role/elb"                       = 1
     managedBy   = "Terraform"
   }
   map_public_ip_on_launch = true
@@ -41,6 +42,7 @@ resource "aws_subnet" "private_subnets" {
 
   tags    = {
     Name        = "${var.project}-${var.environment}-private-subnets"
+    "kubernetes.io/role/internal-elb"              = 1
     managedBy   = "Terraform"
   }
 }

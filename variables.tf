@@ -197,3 +197,21 @@ variable "bucket" {
   type        = string
   default     = null
 }
+
+# ----------------------------------------------------------------
+# AWS EKS Variables
+# ----------------------------------------------------------------
+variable "kubernetes_version" {
+  type        = string
+  description = "Version of EKS"
+}
+
+variable "eks_node_groups" {
+  type        = any
+  description = "List of EKS Node Groups"
+  default     = []
+}
+
+variable "aws_eks_addons" {
+  type = set(string)
+}

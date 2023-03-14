@@ -21,8 +21,8 @@ terraform {
       version = "2.16.0"
     }
     kubectl = {
-      source = "gavinbunney/kubectl"
-      version = "1.14.0"
+      source = "alekc/kubectl"
+      version = "2.0.1"
     }
   }
 }
@@ -37,5 +37,34 @@ provider "aws" {
     team        = "infrastructure"
     ManagedBy   = "Terraform"
     }
+  }
+}
+
+data "aws_eks_cluster" "this" {
+  name = module.aws_eks.cluster_name
+  depends_on = [
+    module.aws_eks,
+  ]
+}
+
+data "aws_eks_cluster_auth" "this" {
+  name = module.aws_eks.cluster_name
+  depends_on = [
+    module.aws_eks,
+  ]
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
   }
 }

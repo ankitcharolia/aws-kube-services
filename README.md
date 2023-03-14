@@ -38,6 +38,8 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 
 * [Encrypt/Decrypt values/files with Terraform/Terragrunt](https://blog.gruntwork.io/a-comprehensive-guide-to-managing-secrets-in-your-terraform-code-1d586955ace1#4df5)
 
+* [AWS EKS Terraform Example-IMPORTANT](https://rderik.com/blog/setting-up-a-kubernetes-cluster-in-amazon-eks-using-terraform/)
+
 ## TO DOs
 
 * VPC &#9989;
