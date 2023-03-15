@@ -1,4 +1,4 @@
-resource "helm_release" "argocd" {
+resource "helm_release" "prometheus_operator_crds" {
 
   name              = var.name
   namespace         = var.namespace
@@ -11,9 +11,4 @@ resource "helm_release" "argocd" {
   cleanup_on_fail   = true
   wait              = true
   timeout           = 500
-
-  values = [
-    file("./charts/argo-cd/values.yaml")
-  ]
-
 }

@@ -11,7 +11,6 @@ variable "namespace" {
 variable "chart_repository" {
   type        = string
   description = "Helm Chart Repository"
-  default     = null
 }
 
 variable "chart_name" {
@@ -22,5 +21,4 @@ variable "chart_name" {
 variable "chart_version" {
   type        = string
   description = "Helm Chart Version"
-  default     = null
 }
