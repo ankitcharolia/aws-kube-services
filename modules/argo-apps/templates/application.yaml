@@ -1,0 +1,64 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${name}
+  namespace: argocd
+  labels:
+    name: ${name}
+  annotations:
+    notifications.argoproj.io/subscribe.slack: argocd-apps-deployment
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: argocd-apps-deployment
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: argocd-apps-deployment
+    notifications.argoproj.io/subscribe.on-deployed.slack: argocd-apps-deployment
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: argocd-apps-deployment
+spec:
+  destination:
+    namespace: ${namespace}
+    server: https://kubernetes.default.svc
+  project: default
+  syncPolicy:
+    automated:
+      prune: ${prune}
+      selfHeal: ${selfHeal}
+      allowEmpty: false
+    syncOptions:
+    - Validate=false
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    - ServerSideApply=true
+    - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s      # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+        factor: 2         # a factor to multiply the base duration after each failed retry
+        maxDuration: 3m   # the maximum amount of time allowed for the backoff strategy
+  revisionHistoryLimit: 10
+%{if ignoreDifferences != []}
+  ignoreDifferences:
+    ${indent(4, yamlencode(ignoreDifferences))}
+%{ endif }
+  source:
+    repoURL: ${repoURL}
+    targetRevision: ${targetRevision}
+  %{if path != null }
+    path: ${path}
+  %{ endif }
+  %{if chart != null }
+    chart: ${chart}
+  %{ endif }
+    helm:
+      releaseName: ${name}
+      ignoreMissingValueFiles: true
+  %{if values != {} }
+      values: |
+        ${indent(8, values)}
+  %{ endif }
+  %{if valueFiles != [] }
+      valueFiles:
+      %{ for valueFile in valueFiles }
+      - ${yamlencode(valueFile)}
+      %{ endfor }
+  %{ endif }
