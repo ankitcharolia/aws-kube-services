@@ -48,5 +48,22 @@ module "istio_base" {
   depends_on =  [
     module.argocd,
   ]
-    
+}
+
+module "istiod" {
+  source = "./modules/argo-apps"
+
+  name                      = "istiod"
+  chart                     = "istiod"
+  namespace                 = "istio-system"
+  repo_url                  = "https://istio-release.storage.googleapis.com/charts"
+  target_revision           = "1.17.1"
+  enable_multi_sources      = true
+  value_files = [
+    "$gitRepo/charts/istiod/values.yaml",
+  ]
+
+  depends_on =  [
+    module.istio_base,
+  ]
 }

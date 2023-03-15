@@ -1,0 +1,24 @@
+sidecarInjectorWebhook:
+  enableNamespacesByDefault: true
+  neverInjectSelector:
+  ## Admission Webhook jobs do not terminate as expected with istio-proxy
+  - matchExpressions:
+    - key: app
+      operator: In 
+      values: 
+      - kube-prometheus-stack-admission-create
+      - kube-prometheus-stack-admission-patch, 
+      - startupapicheck
+
+# Make sure that istio-proxy is started before the application.
+global:
+  defaultPodDisruptionBudget:
+    enabled: false
+  proxy:
+    holdApplicationUntilProxyStarts: true
+
+pilot:
+  # https://istio.io/v1.16/docs/reference/commands/pilot-agent/#envvars
+  env:
+    # https://github.com/istio/istio/issues/34855
+    EXIT_ON_ZERO_ACTIVE_CONNECTIONS: 'true'

@@ -32,6 +32,7 @@ resource "kubectl_manifest" "argocd_application" {
     values            = var.values
     valueFiles        = var.value_files
     ignoreDifferences = var.ignore_differences
+    multiSources      = var.enable_multi_sources
 
   })
 }

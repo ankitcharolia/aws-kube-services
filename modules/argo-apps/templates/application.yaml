@@ -40,25 +40,30 @@ spec:
   ignoreDifferences:
     ${indent(4, yamlencode(ignoreDifferences))}
 %{ endif }
-  source:
-    repoURL: ${repoURL}
+  sources:
+  - repoURL: ${repoURL}
     targetRevision: ${targetRevision}
-  %{if path != null }
+    %{if path != null }
     path: ${path}
-  %{ endif }
-  %{if chart != null }
+    %{ endif }
+    %{if chart != null }
     chart: ${chart}
-  %{ endif }
+    %{ endif }
     helm:
       releaseName: ${name}
       ignoreMissingValueFiles: true
-  %{if values != {} }
+    %{if values != {} }
       values: |
         ${indent(8, values)}
-  %{ endif }
-  %{if valueFiles != [] }
+    %{ endif }
+    %{if valueFiles != [] }
       valueFiles:
       %{ for valueFile in valueFiles }
       - ${yamlencode(valueFile)}
       %{ endfor }
-  %{ endif }
+    %{ endif }
+    %{if multiSources }
+  - repoURL: https://github.com/ankitcharolia/aws-kube-services.git
+    targetRevision: master
+    ref: gitRepo
+    %{ endif }

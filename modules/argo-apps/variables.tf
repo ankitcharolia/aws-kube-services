@@ -63,3 +63,8 @@ variable "wait_for" {
     "status.health.status"  = "Healthy"
   }
 }
+
+variable "enable_multi_sources" {
+  type    = bool
+  default = false
+}
