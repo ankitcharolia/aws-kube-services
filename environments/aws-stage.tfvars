@@ -176,7 +176,7 @@ kubernetes_version  = "1.24"
 eks_node_groups = [
   {
     node_group_name   = "main"
-    desired_size      = 2
+    desired_size      = 3
     min_size          = 2
     max_size          = 10
 
@@ -184,32 +184,32 @@ eks_node_groups = [
       role = "main"
     }
 
-    instance_types    = ["t3.medium"]
+    instance_types    = ["t3.xlarge"]
     capacity_type     = "ON_DEMAND"
     max_unavailable   =   1
   },
-  {
-    node_group_name   = "spot"
-    desired_size      = 2
-    min_size          = 2
-    max_size          = 10
+#   {
+#     node_group_name   = "spot"
+#     desired_size      = 2
+#     min_size          = 2
+#     max_size          = 10
 
-    labels = {
-      role = "spot"
-    }
+#     labels = {
+#       role = "spot"
+#     }
 
-    taints = [
-    {
-        key    = "gitlab-runner"
-        value  = "true"
-        effect = "NO_SCHEDULE"
-    }
-    ]
+#     taints = [
+#     {
+#         key    = "gitlab-runner"
+#         value  = "true"
+#         effect = "NO_SCHEDULE"
+#     }
+#     ]
 
-    instance_types    = ["t3.micro"]
-    capacity_type     = "SPOT"
-    max_unavailable   =   1
-  }
+#     instance_types    = ["t3.micro"]
+#     capacity_type     = "SPOT"
+#     max_unavailable   =   1
+#   }
 ]
 
 aws_eks_addons  = [

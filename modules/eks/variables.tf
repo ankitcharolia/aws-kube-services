@@ -35,3 +35,9 @@ variable "aws_eks_addons" {
   type        = set(string)
   default     = []
 }
+
+variable "oidc_provider_enabled" {
+  type        = bool
+  description = "whether to enable OIDC provider or not"
+  default     = false
+}
