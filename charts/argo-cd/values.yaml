@@ -1,46 +1,45 @@
-argo-cd:
-  redis-ha:
+redis-ha:
+  enabled: true
+
+controller:
+  metrics:
     enabled: true
-
-  controller:
-    metrics:
+    serviceMonitor:
       enabled: true
-      serviceMonitor:
-        enabled: true
-        namespace: argocd
-        additionalLabels:
-          release: kube-prometheus-stack
+      namespace: argocd
+      additionalLabels:
+        release: kube-prometheus-stack
 
-  server:
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        namespace: argocd
-        additionalLabels:
-          release: kube-prometheus-stack
-
-  repoServer:
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        namespace: argocd
-        additionalLabels:
-          release: kube-prometheus-stack
-
-
-
-  # Enable exec feature in Argo UI - Enable Web-based Terminal
-
-  configs:
-    cm:
-      "exec.enabled": "true"
-    params:
-      "server.insecure": "true"
-
-  # Dex reverse proxy does not rewrite Host header, so traffic does not get routed to argocd-dex-server cluster
-  # Reference: https://github.com/argoproj/argo-cd/issues/3975
-  dex:
+server:
+  metrics:
     enabled: true
-    servicePortHttpName: tcp
+    serviceMonitor:
+      enabled: true
+      namespace: argocd
+      additionalLabels:
+        release: kube-prometheus-stack
+
+repoServer:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: argocd
+      additionalLabels:
+        release: kube-prometheus-stack
+
+
+
+# Enable exec feature in Argo UI - Enable Web-based Terminal
+
+configs:
+  cm:
+    "exec.enabled": "true"
+  params:
+    "server.insecure": "true"
+
+# Dex reverse proxy does not rewrite Host header, so traffic does not get routed to argocd-dex-server cluster
+# Reference: https://github.com/argoproj/argo-cd/issues/3975
+dex:
+  enabled: true
+  servicePortHttpName: tcp

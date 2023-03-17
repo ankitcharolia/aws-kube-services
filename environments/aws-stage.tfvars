@@ -3,6 +3,7 @@
 project         = "heute"
 environment     = "stage"
 region          = "eu-west-1"
+github_repo_url = "https://github.com/ankitcharolia/aws-kube-services.git"
 
 # VPC Config
 # ----------------------------------------------------------------

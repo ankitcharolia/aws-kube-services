@@ -16,6 +16,9 @@ variable "region" {
   description = "AWS Region Name"
 }
 
+variable "github_repo_url" {
+  type  = string
+}
 # ----------------------------------------------------------------
 # VPC Variables
 # ----------------------------------------------------------------

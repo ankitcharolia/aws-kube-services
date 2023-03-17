@@ -10,5 +10,6 @@ resource "helm_release" "prometheus_operator_crds" {
   create_namespace  = true
   cleanup_on_fail   = true
   wait              = true
-  timeout           = 500
+  max_history       = 5
+  timeout           = 600
 }

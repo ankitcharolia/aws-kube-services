@@ -24,3 +24,7 @@ variable "chart_version" {
   description = "Helm Chart Version"
   default     = null
 }
+
+variable "github_repo_url" {
+  type = string
+}
