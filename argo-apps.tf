@@ -62,43 +62,15 @@ module "cert_manager" {
   ]
 }
 
-module "istio_base" {
-  source = "./modules/argo-apps"
+module "istio" {
+  source = "./modules/istio"
 
-  name                     = "istio-base"
-  chart                    = "base"
-  namespace                = "istio-system"
-  repo_url                 = "https://istio-release.storage.googleapis.com/charts"
   target_revision          = "1.17.1"
-  ignore_differences = [
-    {
-      group = "admissionregistration.k8s.io"
-      kind  = "ValidatingWebhookConfiguration"
-      name  = "istiod-default-validator"
-      jsonPointers = [
-        "/webhooks/0/failurePolicy",
-      ]
-    }
-  ]
+  istio_ingress_loadbalancer_ip = module.aws_vpc.istio_ingressgateway_loadbalancer_ip
 
   depends_on =  [
     module.argocd,
+    module.aws_vpc,
   ]
 }
 
-# module "istiod" {
-#   source = "./modules/argo-apps"
-
-#   name                      = "istiod"
-#   chart                     = "istiod"
-#   namespace                 = "istio-system"
-#   repo_url                  = "https://istio-release.storage.googleapis.com/charts"
-#   target_revision           = "1.17.1"
-#   value_files = [
-#     "$gitRepo/charts/istiod/values.yaml",
-#   ]
-
-#   depends_on =  [
-#     module.istio_base,
-#   ]
-# }

@@ -1,0 +1,3 @@
+service:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
