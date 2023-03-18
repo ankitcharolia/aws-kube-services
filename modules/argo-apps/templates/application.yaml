@@ -54,7 +54,7 @@ spec:
       ignoreMissingValueFiles: true
     %{if values != {} }
       values: |
-        ${indent(8, values)}
+        ${indent(8, yamlencode(values))}
     %{ endif }
     %{if valueFiles != [] }
       valueFiles:

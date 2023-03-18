@@ -7,48 +7,95 @@ terraform {
   }
 }
 
-resource "helm_release" "cert_manager" {
+resource "aws_iam_policy" "cert_manager_policy" {
+  name        = "cert-manager-policy"
+  path        = "/"
+  description = "Policy, which allows CertManager to create Route53 records"
 
-  name              = var.name
-  namespace         = var.namespace
-  repository        = var.chart_repository
-  chart             = var.chart_name
-  version           = var.chart_version
-  dependency_update = true
-  force_update      = true
-  create_namespace  = true
-  atomic            = true
-  wait              = true
-  cleanup_on_fail   = true
-  max_history       = 5
-  timeout           = 600
+  policy = jsonencode({
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "route53:GetChange",
+      "Resource": "arn:aws:route53:::change/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "route53:ChangeResourceRecordSets",
+        "route53:ListResourceRecordSets"
+      ],
+      "Resource": "arn:aws:route53:::hostedzone/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "route53:ListHostedZonesByName",
+      "Resource": "*"
+    }
+  ]
+  })
+}
+
+# AWS Authentication using IAM Role based Service Account 
+module "cert_manager_irsa" {
+  source                = "../iam-assumable-role-with-oidc"
+  role_name             = "cert-manager"
+  namespace             = "cert-manager"
+  service_account_name  = "cert-manager"
+  role_policy_arns      = aws_iam_policy.cert_manager_policy.arn
+  
+  cluster_identity_oidc_issuer_url  = var.cluster_identity_oidc_issuer_url
+  cluster_identity_oidc_issuer_arn  = var.cluster_identity_oidc_issuer_arn
+}
+
+module "cert_manager" {
+  
+  source          = "../argo-apps"
+  name            = "cert-manager"
+  chart           = "cert-manager"
+  namespace       = "cert-manager"
+  repo_url        = "https://charts.jetstack.io"
+  target_revision = var.target_revision
+
+  values = yamldecode(templatefile("${path.module}/values.yaml.tftpl", {
+    cert_manager_iam_role_arn = module.cert_manager_irsa.iam_role_arn
+  }))
+  value_files = [
+    "$gitRepo/charts/cert-manager/values.yaml",   
+  ]
+
+  depends_on = [
+    module.cert_manager_irsa,
+  ]
 }
 
 # Create Cluster Secret Store
 # Reference: https://medium.com/@danieljimgarcia/dont-use-the-terraform-kubernetes-manifest-resource-6c7ff4fe629a
 resource "kubectl_manifest" "cert_manager_cluster_issuer" {
-  yaml_body  = <<-EOF
+  yaml_body  = <<YAML
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: ${var.environment == "prod" ? "letsencrypt-prod" : "letsencrypt-stage"}
+  name: letsencrypt
   namespace: cert-manager
 spec:
   acme:
     # The ACME server URL
-    server: ${var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}
+    server: "https://acme-v02.api.letsencrypt.org/directory"
     # Email address used for ACME registration
     email: ankitcharolia@gmail.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: ${var.environment == "prod" ? "letsencrypt-prod" : "letsencrypt-stage"}
+      name: letsencrypt
     # Enable the DNS-01 challenge provider
     solvers:
     - dns01:
-        cloudDNS:
-          project: ${var.project}
-          serviceAccountSecretRef:
-            name: clouddns-dns01-solver-svc-acct
-            key: key.json
-    EOF
+        route53:
+          region: ${var.region}
+YAML
+
+depends_on = [
+  module.cert_manager,
+]
 }

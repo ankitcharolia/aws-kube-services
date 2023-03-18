@@ -46,7 +46,22 @@ module "external_secrets" {
   ]
 }
 
+
 # ArgoCD Apps
+module "cert_manager" {
+  source = "./modules/cert-manager"
+
+  target_revision = "1.11.0"
+  region          = var.region
+
+  cluster_identity_oidc_issuer_arn  = module.aws_eks.cluster_identity_oidc_issuer_arn
+  cluster_identity_oidc_issuer_url  = module.aws_eks.cluster_identity_oidc_issuer_url
+
+  depends_on =  [
+    module.aws_eks,
+  ]
+}
+
 module "istio_base" {
   source = "./modules/argo-apps"
 
@@ -79,7 +94,6 @@ module "istio_base" {
 #   namespace                 = "istio-system"
 #   repo_url                  = "https://istio-release.storage.googleapis.com/charts"
 #   target_revision           = "1.17.1"
-#   enable_multi_sources      = true
 #   value_files = [
 #     "$gitRepo/charts/istiod/values.yaml",
 #   ]

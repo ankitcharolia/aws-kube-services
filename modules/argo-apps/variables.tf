@@ -66,5 +66,5 @@ variable "wait_for" {
 
 variable "enable_multi_sources" {
   type    = bool
-  default = false
+  default = true
 }
