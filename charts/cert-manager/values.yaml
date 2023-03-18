@@ -2,5 +2,4 @@ installCRDs: true
 
 # the securityContext is required, so the pod can access files required to assume the IAM role
 securityContext:
-  enabled: true
   fsGroup: 1001
