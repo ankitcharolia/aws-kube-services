@@ -66,11 +66,23 @@ module "istio" {
   source = "./modules/istio"
 
   target_revision          = "1.17.1"
-  istio_ingress_loadbalancer_ip = module.aws_vpc.istio_ingressgateway_loadbalancer_ip
 
   depends_on =  [
     module.argocd,
-    module.aws_vpc,
   ]
 }
 
+module "alb_ingress_controller" {
+  source = "./modules/aws-loadbalancer-controller"
+
+  target_revision   = "1.4.8"
+  project           = var.project
+  cluster_identity_oidc_issuer_arn  = module.aws_eks.cluster_identity_oidc_issuer_arn
+  cluster_identity_oidc_issuer_url  = module.aws_eks.cluster_identity_oidc_issuer_url
+
+
+  depends_on =  [
+    module.argocd,
+    module.aws_eks,
+  ]
+}

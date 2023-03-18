@@ -1,3 +1,7 @@
 serviceAccount:
   create: true
   name: "aws-loadbalancer-controller"
+
+enableCertManager: true
+cluster:
+  dnsDomain: "public.local.com"
