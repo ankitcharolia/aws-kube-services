@@ -59,6 +59,7 @@ module "cert_manager" {
 
   depends_on =  [
     module.aws_eks,
+    module.argocd,
   ]
 }
 
