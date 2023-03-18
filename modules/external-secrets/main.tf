@@ -25,7 +25,7 @@ resource "helm_release" "external_secrets" {
 
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.external_secrets.arn
+    value = module.external_secrets_irsa.iam_role_arn
   }
 }
 
@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "external_secrets" {
 
 }
 
-resource "aws_iam_policy" "external_secrets" {
+resource "aws_iam_policy" "external_secrets_policy" {
 
   name        = "external-secrets"
   path        = "/"
@@ -63,37 +63,16 @@ resource "aws_iam_policy" "external_secrets" {
   policy = data.aws_iam_policy_document.external_secrets.json
 }
 
-data "aws_iam_policy_document" "external_secrets_assume" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+# AWS Authentication using IAM Role based Service Account
+module "external_secrets_irsa" {
+  source                = "../iam-assumable-role-with-oidc"
+  role_name             = "external-secrets"
+  namespace             = "external-secrets"
+  service_account_name  = "external-secrets"
+  role_policy_arns      = aws_iam_policy.external_secrets_policy.arn
 
-    principals {
-      type        = "Federated"
-      identifiers = [var.cluster_identity_oidc_issuer_arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.cluster_identity_oidc_issuer_url, "https://", "")}:sub"
-
-      values = [
-        "system:serviceaccount:${var.namespace}:${var.service_account_name}",
-      ]
-    }
-
-    effect = "Allow"
-  }
-
-}
-
-resource "aws_iam_role" "external_secrets" {
-  name               = "external-secrets"
-  assume_role_policy = data.aws_iam_policy_document.external_secrets_assume.json
-}
-
-resource "aws_iam_role_policy_attachment" "external_secrets" {
-  role       = aws_iam_role.external_secrets.name
-  policy_arn = aws_iam_policy.external_secrets.arn
+  cluster_identity_oidc_issuer_url  = var.cluster_identity_oidc_issuer_url
+  cluster_identity_oidc_issuer_arn  = var.cluster_identity_oidc_issuer_arn
 }
 
 resource "kubectl_manifest" "external_secrets" {
