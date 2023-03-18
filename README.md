@@ -31,6 +31,13 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 
 * [Istio Network Policy Example](https://repo1.dso.mil/big-bang/product/packages/istio-controlplane/-/tree/main/chart)
 
+
+
+#### SEE THIS
+* [Use AWS ALB ingress controller for kube services](https://rtfm.co.ua/en/aws-elastic-kubernetes-service-running-alb-ingress-controller/)
+
+* [Istio + AWS ALB Ingress Controller + Istio Ingress Gateway](https://rtfm.co.ua/en/istio-external-aws-application-loadbalancer-and-istio-ingress-gateway/)
+
 * [Deploying an Istio Gateway with TLS in EKS using the AWS Load Balancer Controller](https://itnext.io/deploying-an-istio-gateway-with-tls-in-eks-using-the-aws-load-balancer-controller-448812e081e5)
 
 * [Secure end-to-end traffic on Amazon EKS using TLS certificate in ACM, ALB, and Istio](https://aws.amazon.com/blogs/containers/secure-end-to-end-traffic-on-amazon-eks-using-tls-certificate-in-acm-alb-and-istio/)

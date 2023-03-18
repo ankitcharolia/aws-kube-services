@@ -139,13 +139,3 @@ resource "aws_route" "default_route" {
   nat_gateway_id         = aws_nat_gateway.nat_gw.id
   destination_cidr_block = "0.0.0.0/0"
 }
-
-resource "aws_eip" "istio_ingress_controller" {
-
-  vpc           = true
-
-  tags   = {
-    Name        = "${var.project}-${var.environment}-istio-ingress-controller-ip"
-    managedBy   = "Terraform"
-  }
-}

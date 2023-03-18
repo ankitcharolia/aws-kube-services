@@ -56,9 +56,9 @@ module "istio_ingressgateway" {
   repo_url        = "https://istio-release.storage.googleapis.com/charts"
   target_revision = var.target_revision
 
-  values = yamldecode(templatefile("${path.module}/values.yaml.tftpl", {
-    loadBalancerIP = var.istio_ingress_loadbalancer_ip
-  }))
+#   values = yamldecode(templatefile("${path.module}/values.yaml.tftpl", {
+#     loadBalancerIP = var.istio_ingress_loadbalancer_ip
+#   }))
   value_files = [
     "$gitRepo/charts/istio-ingressgateway/values.yaml",   
   ]
