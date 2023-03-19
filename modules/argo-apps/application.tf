@@ -10,11 +10,14 @@ terraform {
 resource "kubectl_manifest" "argocd_application" {
 
   dynamic "wait_for" {
-    for_each = try(var.wait_for, [])
+    for_each = length(var.wait_for) > 0 ? [1] : []
       content {
-        field {
-          key   = wait_for.key
-          value = wait_for.value
+        dynamic "field" {
+          for_each = var.wait_for
+          content {
+            key   = field.key
+            value = field.value
+          }
         }
       }
   }
@@ -35,4 +38,18 @@ resource "kubectl_manifest" "argocd_application" {
     multiSources      = var.enable_multi_sources
 
   })
+
+  ignore_fields = [
+    "spec",
+    "metadata.annotations",
+    "status",
+    "metadata.finalizers",
+    "metadata.initializers",
+    "metadata.ownerReferences",
+    "metadata.creationTimestamp",
+    "metadata.generation",
+    "metadata.resourceVersion",
+    "metadata.uid",
+    "metadata.annotations.kubectl.kubernetes.io/last-applied-configuration",
+  ]
 }

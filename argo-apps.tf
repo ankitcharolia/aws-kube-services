@@ -87,3 +87,21 @@ module "alb_ingress_controller" {
     module.aws_eks,
   ]
 }
+
+module "istio_gateways" {
+  source = "./modules/argo-apps"
+
+  name            = "istio-gateways"
+  namespace       = "istio-ingress"
+  path            = "charts/istio-gateways"
+  target_revision = "master"
+  repo_url        = var.github_repo_url
+  values = {
+    domain = var.public_zone_name
+  }
+
+
+  depends_on =  [
+    module.argocd,
+  ]
+}

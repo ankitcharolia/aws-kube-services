@@ -60,7 +60,8 @@ variable "ignore_differences" {
 variable "wait_for" {
   type    = map(string)
   default = {
-    "status.health.status"  = "Healthy"
+    "status.health.status"  = "Healthy",
+    "status.sync.status"    = "Synced",
   }
 }
 
