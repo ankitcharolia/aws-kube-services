@@ -22,6 +22,7 @@ module "argocd" {
   chart_name       = "argo-cd"
   chart_version    = "5.27.1"
   github_repo_url  = var.github_repo_url
+  public_zone_name = var.public_zone_name
 
   depends_on = [
     module.prometheus_operator_crds,

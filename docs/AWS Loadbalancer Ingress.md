@@ -1,5 +1,9 @@
 
 ## **Deploy game-2048 with AWS LoadBalancer Controller**
+
+### **Architecture**
+![game-2048](../images/kubernetes-alb-architecture.png)
+
 ```shell
 kubectl apply -f charts/game-2048/full-deployment.yaml
 ```

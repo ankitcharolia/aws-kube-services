@@ -28,3 +28,7 @@ variable "chart_version" {
 variable "github_repo_url" {
   type = string
 }
+
+variable "public_zone_name" {
+  type = string
+}

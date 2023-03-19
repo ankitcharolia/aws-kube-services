@@ -40,3 +40,14 @@ resource "kubectl_manifest" "gitlab_external_secret" {
     helm_release.argocd,
   ]
 }
+
+resource "kubectl_manifest" "argocd_vsvc" {
+
+  yaml_body = templatefile("${path.module}/argocd-vsvc.yaml", {
+    domain = var.public_zone_name,
+  })
+
+  depends_on = [
+    helm_release.argocd,
+  ]
+}
