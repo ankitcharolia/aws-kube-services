@@ -97,7 +97,7 @@ module "istio_gateways" {
   target_revision = "master"
   repo_url        = var.github_repo_url
   values = {
-    domain = var.public_zone_name
+    domainName = var.public_zone_name
   }
 
 

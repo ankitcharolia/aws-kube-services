@@ -17,6 +17,6 @@ spec:
   usages:
     - server auth
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt
     kind: ClusterIssuer
     group: cert-manager.io

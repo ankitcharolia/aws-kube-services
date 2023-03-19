@@ -4,4 +4,4 @@ serviceAccount:
 
 enableCertManager: true
 cluster:
-  dnsDomain: "public.local.com"
+  dnsDomain: "cluster.local"
