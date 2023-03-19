@@ -13,44 +13,44 @@ resource "aws_iam_policy" "cert_manager_policy" {
   description = "Policy, which allows CertManager to create Route53 records"
 
   policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "route53:GetChange",
-      "Resource": "arn:aws:route53:::change/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "route53:ChangeResourceRecordSets",
-        "route53:ListResourceRecordSets"
-      ],
-      "Resource": "arn:aws:route53:::hostedzone/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "route53:ListHostedZonesByName",
-      "Resource": "*"
-    }
-  ]
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "route53:GetChange",
+        "Resource" : "arn:aws:route53:::change/*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ],
+        "Resource" : "arn:aws:route53:::hostedzone/*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "route53:ListHostedZonesByName",
+        "Resource" : "*"
+      }
+    ]
   })
 }
 
 # AWS Authentication using IAM Role based Service Account 
 module "cert_manager_irsa" {
-  source                = "../iam-assumable-role-with-oidc"
-  role_name             = "cert-manager"
-  namespace             = "cert-manager"
-  service_account_name  = "cert-manager"
-  role_policy_arns      = aws_iam_policy.cert_manager_policy.arn
-  
-  cluster_identity_oidc_issuer_url  = var.cluster_identity_oidc_issuer_url
-  cluster_identity_oidc_issuer_arn  = var.cluster_identity_oidc_issuer_arn
+  source               = "../iam-assumable-role-with-oidc"
+  role_name            = "cert-manager"
+  namespace            = "cert-manager"
+  service_account_name = "cert-manager"
+  role_policy_arns     = aws_iam_policy.cert_manager_policy.arn
+
+  cluster_identity_oidc_issuer_url = var.cluster_identity_oidc_issuer_url
+  cluster_identity_oidc_issuer_arn = var.cluster_identity_oidc_issuer_arn
 }
 
 module "cert_manager" {
-  
+
   source          = "../argo-apps"
   name            = "cert-manager"
   chart           = "cert-manager"
@@ -62,7 +62,7 @@ module "cert_manager" {
     cert_manager_iam_role_arn = module.cert_manager_irsa.iam_role_arn
   }))
   value_files = [
-    "$gitRepo/charts/cert-manager/values.yaml",   
+    "$gitRepo/charts/cert-manager/values.yaml",
   ]
 
   depends_on = [
@@ -73,7 +73,7 @@ module "cert_manager" {
 # Create Cluster Secret Store
 # Reference: https://medium.com/@danieljimgarcia/dont-use-the-terraform-kubernetes-manifest-resource-6c7ff4fe629a
 resource "kubectl_manifest" "cert_manager_cluster_issuer" {
-  yaml_body  = <<YAML
+  yaml_body = <<YAML
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -95,7 +95,7 @@ spec:
           region: ${var.region}
 YAML
 
-depends_on = [
-  module.cert_manager,
-]
+  depends_on = [
+    module.cert_manager,
+  ]
 }

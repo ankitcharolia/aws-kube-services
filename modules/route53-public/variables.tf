@@ -42,7 +42,7 @@ variable "force_destroy" {
 variable "public_zone_tags" {
   type        = map(string)
   description = "A mapping of tags to assign to the zone."
-  default = {}
+  default     = {}
 }
 
 variable "public_zone_nameservers" {
@@ -53,6 +53,6 @@ variable "public_zone_nameservers" {
 
 variable "public_zone_aliases" {
   description = "List of Private Zone aliases"
-  type = any
-  default = []
+  type        = any
+  default     = []
 }

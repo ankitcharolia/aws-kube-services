@@ -1,5 +1,5 @@
 module "aws_secrets_manager" {
- source = "./modules/aws-secrets-manager"
+  source = "./modules/aws-secrets-manager"
 
- environment  = var.environment
+  environment = var.environment
 }

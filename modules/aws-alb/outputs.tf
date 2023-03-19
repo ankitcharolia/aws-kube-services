@@ -7,7 +7,7 @@ output "alb_dns_name" {
   value = toset([
     for key, value in aws_lb.alb : {
       (key) : {
-        "dns_name"         = value.dns_name
+        "dns_name" = value.dns_name
       }
     }
   ])

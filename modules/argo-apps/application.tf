@@ -11,18 +11,18 @@ resource "kubectl_manifest" "argocd_application" {
 
   dynamic "wait_for" {
     for_each = length(var.wait_for) > 0 ? [1] : []
-      content {
-        dynamic "field" {
-          for_each = var.wait_for
-          content {
-            key   = field.key
-            value = field.value
-          }
+    content {
+      dynamic "field" {
+        for_each = var.wait_for
+        content {
+          key   = field.key
+          value = field.value
         }
       }
+    }
   }
 
-  yaml_body         = templatefile("${path.module}/templates/application.yaml", {
+  yaml_body = templatefile("${path.module}/templates/application.yaml", {
 
     name              = var.name
     namespace         = var.namespace

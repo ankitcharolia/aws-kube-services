@@ -1,6 +1,6 @@
 variable "project" {
   description = "Name to be used on all the resources as identifier. e.g. Project name, Application name"
-  type = string
+  type        = string
 }
 
 variable "eks_node_groups" {
@@ -10,9 +10,9 @@ variable "eks_node_groups" {
 }
 
 variable "capacity_type" {
-  type = string
+  type        = string
   description = "Type of the EKS node group: ON_DEMAND or SPOT"
-  default = "ON_DEMAND"
+  default     = "ON_DEMAND"
 }
 
 variable "vpc_id" {
@@ -22,8 +22,8 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   description = "List of subnets"
-  type        = list
-  default     = []  
+  type        = list(any)
+  default     = []
 }
 
 variable "kubernetes_version" {
@@ -32,8 +32,8 @@ variable "kubernetes_version" {
 }
 
 variable "aws_eks_addons" {
-  type        = set(string)
-  default     = []
+  type    = set(string)
+  default = []
 }
 
 variable "oidc_provider_enabled" {

@@ -5,14 +5,14 @@ variable "vpc_id" {
 
 variable "subnets" {
   description = "List of subnets"
-  type        = list
-  default     = []  
+  type        = list(any)
+  default     = []
 }
 
 variable "bucket" {
   description = "Name of bucket"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "public_zone_name" {

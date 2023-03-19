@@ -51,7 +51,7 @@ resource "aws_eks_cluster" "this" {
   }
 
   tags = {
-    Name        = "${var.project}-kube-cluster"
+    Name = "${var.project}-kube-cluster"
   }
 
   depends_on = [
@@ -68,7 +68,7 @@ resource "aws_eks_cluster" "this" {
 
 # EKS Node Groups
 resource "aws_eks_node_group" "this" {
-  for_each      = { for node_group in var.eks_node_groups : node_group.capacity_type => node_group }
+  for_each = { for node_group in var.eks_node_groups : node_group.capacity_type => node_group }
 
   cluster_name    = aws_eks_cluster.this.name
   version         = aws_eks_cluster.this.version
@@ -104,7 +104,7 @@ resource "aws_eks_node_group" "this" {
   labels = each.value.labels
 
   tags = {
-    Name        = "${var.project}-kube-cluster"
+    Name = "${var.project}-kube-cluster"
   }
 
   depends_on = [
@@ -118,7 +118,7 @@ resource "aws_eks_node_group" "this" {
   # desired_size, min_size and max_size in scaling_config
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [scaling_config[0].desired_size]
+    ignore_changes        = [scaling_config[0].desired_size]
   }
 }
 
@@ -136,7 +136,7 @@ resource "aws_security_group" "eks_nodes" {
   }
 
   tags = {
-    Name  = "${var.project}-eks-node-sg"
+    Name                                                = "${var.project}-eks-node-sg"
     "kubernetes.io/cluster/${var.project}-kube-cluster" = "owned"
   }
 }
@@ -163,7 +163,7 @@ resource "aws_security_group_rule" "nodes_cluster_inbound" {
 
 # install AWS EKS add-ons
 resource "aws_eks_addon" "this" {
-  for_each          = var.aws_eks_addons
+  for_each = var.aws_eks_addons
 
   cluster_name      = aws_eks_cluster.this.name
   addon_name        = each.value
@@ -189,7 +189,7 @@ resource "aws_iam_openid_connect_provider" "default" {
   count = var.oidc_provider_enabled ? 1 : 0
   url   = one(aws_eks_cluster.this[*].identity.0.oidc.0.issuer)
   tags = {
-    Name        = "${var.project}-kube-cluster-oidc"
+    Name = "${var.project}-kube-cluster-oidc"
   }
 
   client_id_list  = ["sts.amazonaws.com"]

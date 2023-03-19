@@ -1,31 +1,31 @@
 terraform {
 
   backend "s3" {
-    bucket                = "terraform-kube-state"
-    key                   = "terraform.tfstate"
-    workspace_key_prefix  = "environments"
-    region                = "eu-west-1"
+    bucket               = "terraform-kube-state"
+    key                  = "terraform.tfstate"
+    workspace_key_prefix = "environments"
+    region               = "eu-west-1"
   }
 
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "4.58.0"
     }
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
       version = "2.9.0"
     }
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "2.18.1"
     }
     kubectl = {
-      source = "alekc/kubectl"
+      source  = "alekc/kubectl"
       version = "2.0.1"
     }
     tls = {
-      source = "hashicorp/tls"
+      source  = "hashicorp/tls"
       version = "4.0.4"
     }
   }
@@ -36,10 +36,10 @@ provider "aws" {
   region = "eu-west-1"
 
   default_tags {
-  tags = {
-    environment = var.environment
-    team        = "infrastructure"
-    ManagedBy   = "Terraform"
+    tags = {
+      environment = var.environment
+      team        = "infrastructure"
+      ManagedBy   = "Terraform"
     }
   }
 }

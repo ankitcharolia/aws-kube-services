@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "external_secrets" {
       "secretsmanager:ListSecretVersionIds"
     ]
     resources = ["*"]
-    effect = "Allow"
+    effect    = "Allow"
   }
 
   statement {
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "external_secrets" {
       "ssm:GetParameter*"
     ]
     resources = ["*"]
-    effect = "Allow"
+    effect    = "Allow"
   }
 
 }
@@ -65,14 +65,14 @@ resource "aws_iam_policy" "external_secrets_policy" {
 
 # AWS Authentication using IAM Role based Service Account
 module "external_secrets_irsa" {
-  source                = "../iam-assumable-role-with-oidc"
-  role_name             = "external-secrets"
-  namespace             = "external-secrets"
-  service_account_name  = "external-secrets"
-  role_policy_arns      = aws_iam_policy.external_secrets_policy.arn
+  source               = "../iam-assumable-role-with-oidc"
+  role_name            = "external-secrets"
+  namespace            = "external-secrets"
+  service_account_name = "external-secrets"
+  role_policy_arns     = aws_iam_policy.external_secrets_policy.arn
 
-  cluster_identity_oidc_issuer_url  = var.cluster_identity_oidc_issuer_url
-  cluster_identity_oidc_issuer_arn  = var.cluster_identity_oidc_issuer_arn
+  cluster_identity_oidc_issuer_url = var.cluster_identity_oidc_issuer_url
+  cluster_identity_oidc_issuer_arn = var.cluster_identity_oidc_issuer_arn
 }
 
 resource "kubectl_manifest" "external_secrets" {

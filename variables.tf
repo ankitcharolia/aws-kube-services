@@ -17,7 +17,7 @@ variable "region" {
 }
 
 variable "github_repo_url" {
-  type  = string
+  type = string
 }
 # ----------------------------------------------------------------
 # VPC Variables
@@ -73,7 +73,7 @@ variable "public_zone_comment" {
 variable "public_zone_tags" {
   type        = map(string)
   description = "A mapping of tags to assign to the zone."
-  default = {}
+  default     = {}
 }
 
 variable "public_zone_nameservers" {
@@ -84,7 +84,7 @@ variable "public_zone_nameservers" {
 
 variable "public_zone_aliases" {
   description = "List of Private Zone aliases"
-  type = any
+  type        = any
 }
 
 ## Private DNS Zone Variables
@@ -115,7 +115,7 @@ variable "private_zone_comment" {
 variable "private_zone_tags" {
   type        = map(string)
   description = "A mapping of tags to assign to the zone."
-  default = {}
+  default     = {}
 }
 
 variable "private_zone_nameservers" {
@@ -126,7 +126,7 @@ variable "private_zone_nameservers" {
 
 variable "private_zone_aliases" {
   description = "List of Private Zone aliases"
-  type = any
+  type        = any
 }
 
 # ----------------------------------------------------------------
@@ -171,9 +171,9 @@ variable "account_pass_policy" {
 # AWS KMS Variables
 # ----------------------------------------------------------------
 variable "kms_alias" {
-  type          = string
-  description   = "The display name of the key."
-  default = ""
+  type        = string
+  description = "The display name of the key."
+  default     = ""
   validation {
     condition     = var.kms_alias == "" || can(regex("alias\\/.+", var.kms_alias))
     error_message = "The name must start with the word 'alias' followed by a forward slash."
@@ -181,9 +181,9 @@ variable "kms_alias" {
 }
 
 variable "use_aws_key_material" {
-  type          = bool
-  description   = "Whether to use AWS managed key materia or customer managed key material"
-  default       = false
+  type        = bool
+  description = "Whether to use AWS managed key materia or customer managed key material"
+  default     = false
 }
 
 # ----------------------------------------------------------------

@@ -1,70 +1,70 @@
 locals {
   policy_data = yamldecode(file("./etc/policies.yaml"))
-  group_data = yamldecode(file("./etc/groups.yaml"))
-  user_data = yamldecode(file("./etc/users.yaml"))
-  role_data = yamldecode(file("./etc/roles.yaml"))
+  group_data  = yamldecode(file("./etc/groups.yaml"))
+  user_data   = yamldecode(file("./etc/users.yaml"))
+  role_data   = yamldecode(file("./etc/roles.yaml"))
 
-  group_policies  = flatten([for group in local.group_data.groups : [
-      for policy in try(group.policies, []) : {
-        name      = group.name
-        policy    = policy
-      }
+  group_policies = flatten([for group in local.group_data.groups : [
+    for policy in try(group.policies, []) : {
+      name   = group.name
+      policy = policy
+    }
     ]
   ])
 
   group_policy_arns = flatten([for group in local.group_data.groups : [
-      for policy_arn in try(group.policy_arns, []) : {
-        name        = group.name
-        policy_arn  = policy_arn
-      }
+    for policy_arn in try(group.policy_arns, []) : {
+      name       = group.name
+      policy_arn = policy_arn
+    }
     ]
   ])
 
   user_groups = flatten([for user in local.user_data.users : [
-      for group in try(user.groups, []) : {
-        name      = user.name
-        groups    = group
-      }
+    for group in try(user.groups, []) : {
+      name   = user.name
+      groups = group
+    }
     ]
   ])
 
-  user_policies  = flatten([for user in local.user_data.users : [
-      for policy in try(user.policies, []) : {
-        name      = user.name
-        policy    = policy
-      }
+  user_policies = flatten([for user in local.user_data.users : [
+    for policy in try(user.policies, []) : {
+      name   = user.name
+      policy = policy
+    }
     ]
   ])
 
   user_policy_arns = flatten([for user in local.user_data.users : [
-      for policy_arn in try(user.policy_arns, []) : {
-        name        = user.name
-        policy_arn  = policy_arn
-      }
+    for policy_arn in try(user.policy_arns, []) : {
+      name       = user.name
+      policy_arn = policy_arn
+    }
     ]
   ])
 
   user_login_profile = flatten([for user in local.user_data.users : [
-      for access_key in try(user.access_keys, []) : {
-        name      = user.name
-        pgp_key   = access_key.pgp_key
-      }
+    for access_key in try(user.access_keys, []) : {
+      name    = user.name
+      pgp_key = access_key.pgp_key
+    }
     ]
   ])
 
-  role_policies  = flatten([for role in local.role_data.roles : [
-      for policy in try(role.policies, []) : {
-        name      = role.name
-        policy    = policy
-      }
+  role_policies = flatten([for role in local.role_data.roles : [
+    for policy in try(role.policies, []) : {
+      name   = role.name
+      policy = policy
+    }
     ]
   ])
 
   role_policy_arns = flatten([for role in local.role_data.roles : [
-      for policy_arn in try(role.policy_arns, []) : {
-        name        = role.name
-        policy_arn  = policy_arn
-      }
+    for policy_arn in try(role.policy_arns, []) : {
+      name       = role.name
+      policy_arn = policy_arn
+    }
     ]
   ])
 
@@ -110,8 +110,8 @@ resource "aws_iam_policy" "policies" {
   name        = each.value.name
   path        = try(each.value.path, "/")
   description = each.value.description
-  policy      = templatefile("./files/policies/${each.value.name}.json", {
-      aws_account_id = data.aws_caller_identity.current.account_id
+  policy = templatefile("./files/policies/${each.value.name}.json", {
+    aws_account_id = data.aws_caller_identity.current.account_id
   })
 
   tags = {
@@ -134,7 +134,7 @@ resource "aws_iam_group" "groups" {
 
 # # Attach customer managed policies to group
 resource "aws_iam_group_policy_attachment" "policy_attachments" {
-  for_each =  { for idx, record in local.group_policies : idx => record }
+  for_each = { for idx, record in local.group_policies : idx => record }
 
   group      = each.value.name
   policy_arn = aws_iam_policy.policies[each.value.policy].arn
@@ -147,7 +147,7 @@ resource "aws_iam_group_policy_attachment" "policy_attachments" {
 
 # Attach policy ARNs to group
 resource "aws_iam_group_policy_attachment" "policy_arn_attachments" {
-  for_each =  { for idx, record in local.group_policy_arns : idx => record }
+  for_each = { for idx, record in local.group_policy_arns : idx => record }
 
   group      = each.value.name
   policy_arn = each.value.policy_arn
@@ -164,7 +164,7 @@ resource "aws_iam_user" "users" {
   for_each = { for user in local.user_data.users : user.name => user }
 
   name = each.value.name
-  path = try(each.value.path, "/") 
+  path = try(each.value.path, "/")
 
   # The boundary defines the maximum allowed permissions which cannot exceed.
   # Even if the policy has higher permission, the boundary sets the final limit
@@ -177,7 +177,7 @@ resource "aws_iam_user" "users" {
 
 # Attach customer managed policies to user
 resource "aws_iam_user_policy_attachment" "policy_attachments" {
-  for_each =  { for idx, record in local.user_policies : idx => record }
+  for_each = { for idx, record in local.user_policies : idx => record }
 
   user       = each.value.name
   policy_arn = aws_iam_policy.policies[each.value.policy].arn
@@ -190,7 +190,7 @@ resource "aws_iam_user_policy_attachment" "policy_attachments" {
 
 # Attach policy ARNs to user
 resource "aws_iam_user_policy_attachment" "policy_arn_attachments" {
-  for_each =  { for idx, record in local.user_policy_arns : idx => record }
+  for_each = { for idx, record in local.user_policy_arns : idx => record }
 
   user       = each.value.name
   policy_arn = each.value.policy_arn
@@ -200,9 +200,9 @@ resource "aws_iam_user_policy_attachment" "policy_arn_attachments" {
 
 # Add users to groups
 resource "aws_iam_user_group_membership" "group_membership" {
-  for_each =  { for idx, record in local.user_groups : idx => record }
+  for_each = { for idx, record in local.user_groups : idx => record }
 
-  user   = each.value.name
+  user = each.value.name
   groups = [
     each.value.groups,
   ]

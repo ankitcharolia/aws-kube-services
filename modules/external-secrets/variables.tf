@@ -30,7 +30,7 @@ variable "service_account_name" {
 }
 
 variable "region" {
-  type        = string
+  type = string
 }
 
 variable "cluster_identity_oidc_issuer_url" {

@@ -8,7 +8,7 @@ terraform {
 }
 
 module "istio_base" {
-  
+
   source          = "../argo-apps"
   name            = "istio-base"
   chart           = "base"
@@ -30,7 +30,7 @@ module "istio_base" {
 }
 
 module "istiod" {
-  
+
   source          = "../argo-apps"
   name            = "istiod"
   chart           = "istiod"
@@ -39,7 +39,7 @@ module "istiod" {
   target_revision = var.target_revision
 
   value_files = [
-    "$gitRepo/charts/istiod/values.yaml",   
+    "$gitRepo/charts/istiod/values.yaml",
   ]
 
   depends_on = [
@@ -48,7 +48,7 @@ module "istiod" {
 }
 
 module "istio_ingressgateway" {
-  
+
   source          = "../argo-apps"
   name            = "istio-ingressgateway"
   chart           = "gateway"
@@ -56,11 +56,11 @@ module "istio_ingressgateway" {
   repo_url        = "https://istio-release.storage.googleapis.com/charts"
   target_revision = var.target_revision
 
-#   values = yamldecode(templatefile("${path.module}/values.yaml.tftpl", {
-#     loadBalancerIP = var.istio_ingress_loadbalancer_ip
-#   }))
+  #   values = yamldecode(templatefile("${path.module}/values.yaml.tftpl", {
+  #     loadBalancerIP = var.istio_ingress_loadbalancer_ip
+  #   }))
   value_files = [
-    "$gitRepo/charts/istio-ingressgateway/values.yaml",   
+    "$gitRepo/charts/istio-ingressgateway/values.yaml",
   ]
 
   depends_on = [

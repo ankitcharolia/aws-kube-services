@@ -34,8 +34,8 @@ variable "subnet_ids" {
 }
 
 variable "create_db_subnet_group" {
-  type        = bool
-  default     = true
+  type    = bool
+  default = true
 }
 
 ################################################################################################################################################################
@@ -90,9 +90,9 @@ variable "options" {
 }
 
 variable "db_option_group_timeouts" {
-  description   = "Define maximum timeout for deletion of `aws_db_option_group` resource"
-  type          = string
-  default       = "15m"
+  description = "Define maximum timeout for deletion of `aws_db_option_group` resource"
+  type        = string
+  default     = "15m"
 }
 
 ################################################################################################################################################################

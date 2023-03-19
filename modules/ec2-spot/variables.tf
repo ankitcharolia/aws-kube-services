@@ -185,12 +185,12 @@ variable "dns_name" {
 }
 
 variable "spot_price" {
-  type = string
-  default = "0.016"
+  type        = string
+  default     = "0.016"
   description = "Maximum price to pay for spot instance (Hourly price)"
 }
 variable "spot_type" {
-  type = string
-  default = "one-time"
+  type        = string
+  default     = "one-time"
   description = "Spot instance type, this value only applies for spot instance type."
 }

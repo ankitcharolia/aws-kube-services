@@ -23,7 +23,7 @@ variable "self_heal" {
   default = true
 }
 
-variable  "chart" {
+variable "chart" {
   type        = string
   description = "The name of the Helm chart"
   default     = null
@@ -58,10 +58,10 @@ variable "ignore_differences" {
 }
 
 variable "wait_for" {
-  type    = map(string)
+  type = map(string)
   default = {
-    "status.health.status"  = "Healthy",
-    "status.sync.status"    = "Synced",
+    "status.health.status" = "Healthy",
+    "status.sync.status"   = "Synced",
   }
 }
 

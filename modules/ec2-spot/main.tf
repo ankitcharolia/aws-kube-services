@@ -7,25 +7,25 @@
 locals {
   yaml_data = yamldecode(file("./etc/ec2-spot.yaml"))
 
-  inbound_rules   = flatten([for instance in local.yaml_data.ec2_instances : [
-      for inbound_rule in try(instance.sg_inbound_rules, []) : {
-        name        = instance.name
-        from_port   = inbound_rule.port
-        to_port     = inbound_rule.port
-        protocol    = inbound_rule.protocol
-        cidr_blocks = inbound_rule.cidr_blocks
-      }
+  inbound_rules = flatten([for instance in local.yaml_data.ec2_instances : [
+    for inbound_rule in try(instance.sg_inbound_rules, []) : {
+      name        = instance.name
+      from_port   = inbound_rule.port
+      to_port     = inbound_rule.port
+      protocol    = inbound_rule.protocol
+      cidr_blocks = inbound_rule.cidr_blocks
+    }
     ]
   ])
 
-  outbound_rules   = flatten([for instance in local.yaml_data.ec2_instances : [
-      for outbound_rule in try(instance.sg_outbound_rules, []) : {
-        name        = instance.name
-        from_port   = try(outbound_rule.port, 0)
-        to_port     = try(outbound_rule.port, 0)
-        protocol    = try(outbound_rule.protocol, -1)
-        cidr_blocks = try(outbound_rule.cidr_blocks, ["0.0.0.0/0"])
-      }
+  outbound_rules = flatten([for instance in local.yaml_data.ec2_instances : [
+    for outbound_rule in try(instance.sg_outbound_rules, []) : {
+      name        = instance.name
+      from_port   = try(outbound_rule.port, 0)
+      to_port     = try(outbound_rule.port, 0)
+      protocol    = try(outbound_rule.protocol, -1)
+      cidr_blocks = try(outbound_rule.cidr_blocks, ["0.0.0.0/0"])
+    }
     ]
   ])
 }
@@ -33,17 +33,17 @@ locals {
 resource "aws_security_group" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
-  name          = "${each.value.name}-sg"
-  description   = "${each.value.name}-security-group"
-  vpc_id        = var.vpc_id
- 
+  name        = "${each.value.name}-sg"
+  description = "${each.value.name}-security-group"
+  vpc_id      = var.vpc_id
+
   tags = {
-    Name        = "${each.value.name}-sg"
+    Name = "${each.value.name}-sg"
   }
 }
 
 resource "aws_security_group_rule" "ingress" {
-  for_each =  { for idx, record in local.inbound_rules : idx => record }
+  for_each = { for idx, record in local.inbound_rules : idx => record }
 
   type              = "ingress"
   from_port         = each.value.from_port
@@ -52,17 +52,17 @@ resource "aws_security_group_rule" "ingress" {
   cidr_blocks       = try(each.value.cidr_blocks, null)
   security_group_id = aws_security_group.this[each.value.name].id
   # source_security_group_id and cidr_blocks can not be specified together
-  source_security_group_id  = try(each.value.source_security_group_id, null)
+  source_security_group_id = try(each.value.source_security_group_id, null)
 }
 
 resource "aws_security_group_rule" "egress" {
-  for_each =  { for idx, record in local.outbound_rules : idx => record }
+  for_each = { for idx, record in local.outbound_rules : idx => record }
 
-  type        = "egress"
-  from_port   = each.value.from_port
-  to_port     = each.value.from_port
-  protocol    = each.value.protocol
-  cidr_blocks = each.value.cidr_blocks
+  type              = "egress"
+  from_port         = each.value.from_port
+  to_port           = each.value.from_port
+  protocol          = each.value.protocol
+  cidr_blocks       = each.value.cidr_blocks
   security_group_id = aws_security_group.this[each.value.name].id
 }
 
@@ -84,10 +84,10 @@ resource "aws_ebs_volume" "this" {
 resource "aws_volume_attachment" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.create_extra_disk, false) }
 
-  device_name                       = "/dev/sdb"
-  volume_id                         = try(each.value.create_extra_disk ? aws_ebs_volume.this[each.key].id : null, null)
-  instance_id                       = try(each.value.create_extra_disk ? aws_spot_instance_request.this[each.key].spot_instance_id : null, null)
-  stop_instance_before_detaching    = true
+  device_name                    = "/dev/sdb"
+  volume_id                      = try(each.value.create_extra_disk ? aws_ebs_volume.this[each.key].id : null, null)
+  instance_id                    = try(each.value.create_extra_disk ? aws_spot_instance_request.this[each.key].spot_instance_id : null, null)
+  stop_instance_before_detaching = true
 }
 
 data "aws_ami" "this" {
@@ -110,22 +110,22 @@ data "aws_ami" "this" {
 resource "aws_spot_instance_request" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
-  ami                             = try(each.value.ami_id, data.aws_ami.this.id)
-  instance_type                   = try(each.value.instance_type, var.instance_type)
-  availability_zone               = each.value.availability_zone
-  monitoring                      = try(each.value.monitoring, var.monitoring)
-  key_name                        = var.ssh_key_pair
-  spot_type                       = try(each.value.spot_type, var.spot_type)
-  spot_price                      = try(each.value.spot_price, var.spot_price)
-  instance_interruption_behavior  = try(each.value.instance_interruption_behavior, "terminate")
-  wait_for_fulfillment            = true
-  user_data                       = file("./etc/cloud-init/initialize.sh")
-  subnet_id                       = var.subnet_id
-  vpc_security_group_ids          = try([aws_security_group.this[each.value.name].id], null)
+  ami                            = try(each.value.ami_id, data.aws_ami.this.id)
+  instance_type                  = try(each.value.instance_type, var.instance_type)
+  availability_zone              = each.value.availability_zone
+  monitoring                     = try(each.value.monitoring, var.monitoring)
+  key_name                       = var.ssh_key_pair
+  spot_type                      = try(each.value.spot_type, var.spot_type)
+  spot_price                     = try(each.value.spot_price, var.spot_price)
+  instance_interruption_behavior = try(each.value.instance_interruption_behavior, "terminate")
+  wait_for_fulfillment           = true
+  user_data                      = file("./etc/cloud-init/initialize.sh")
+  subnet_id                      = var.subnet_id
+  vpc_security_group_ids         = try([aws_security_group.this[each.value.name].id], null)
 
   root_block_device {
-    volume_type           = try(each.value.root_volume_type ,var.root_volume_type)
-    volume_size           = try(each.value.root_volume_size ,var.root_volume_size)
+    volume_type           = try(each.value.root_volume_type, var.root_volume_type)
+    volume_size           = try(each.value.root_volume_size, var.root_volume_size)
     delete_on_termination = var.delete_on_termination
     encrypted             = var.root_block_device_encrypted
     kms_key_id            = var.root_block_device_kms_key_id
@@ -150,7 +150,7 @@ resource "aws_spot_instance_request" "this" {
   }
 
 
-  tags      = merge(try(each.value.tags, null), {
+  tags = merge(try(each.value.tags, null), {
     Name              = "${each.value.name}.${var.dns_name}"
     create_extra_disk = try(each.value.create_extra_disk, false)
     mount_dir         = try(each.value.mount_dir, "/var/opt")
@@ -167,10 +167,10 @@ resource "aws_spot_instance_request" "this" {
 resource "aws_eip" "this" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance if try(instance.assign_eip, false) }
 
-  vpc         = true
-  instance    = aws_spot_instance_request.this[each.key].id
-  tags        = try(each.value.tags, null)
-  depends_on  = [
+  vpc      = true
+  instance = aws_spot_instance_request.this[each.key].id
+  tags     = try(each.value.tags, null)
+  depends_on = [
     aws_spot_instance_request.this,
   ]
 }
@@ -186,9 +186,9 @@ resource "aws_ec2_instance_state" "this" {
 resource "aws_route53_record" "a_record" {
   for_each = { for instance in local.yaml_data.ec2_instances : instance.name => instance }
 
-  zone_id   = var.zone_id
-  name      = "${each.value.name}.${var.dns_name}"
-  type      = "A"
-  ttl       = "300"
-  records   =  [aws_spot_instance_request.this[each.key].private_ip]
+  zone_id = var.zone_id
+  name    = "${each.value.name}.${var.dns_name}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_spot_instance_request.this[each.key].private_ip]
 }

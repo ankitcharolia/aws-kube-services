@@ -17,8 +17,8 @@ resource "aws_db_subnet_group" "this" {
   subnet_ids  = var.subnet_ids
 
   tags = {
-      Name = "${var.identifier}-db-subnet-group"
-    }
+    Name = "${var.identifier}-db-subnet-group"
+  }
 
 }
 
@@ -28,10 +28,10 @@ resource "aws_db_subnet_group" "this" {
 
 resource "aws_db_option_group" "this" {
   count = var.create_db_option_group ? 1 : 0
-  
-  name                     = var.identifier
-  engine_name              = var.engine_name
-  major_engine_version     = var.major_engine_version
+
+  name                 = var.identifier
+  engine_name          = var.engine_name
+  major_engine_version = var.major_engine_version
 
   dynamic "option" {
     for_each = var.options
@@ -60,7 +60,7 @@ resource "aws_db_option_group" "this" {
     create_before_destroy = true
   }
 
-  tags  = {
+  tags = {
     Name = "${var.identifier}-db-option-group"
   }
 }
@@ -85,7 +85,7 @@ resource "aws_db_parameter_group" "this" {
     create_before_destroy = true
   }
 
-  tags  = {
+  tags = {
     Name = "${var.identifier}-db-option-group"
   }
 }
@@ -136,42 +136,42 @@ resource "random_password" "root_password" {
 # Find Engine and EngineVersion: aws rds describe-db-engine-versions  --query 'DBEngineVersions[*].{Engine:Engine,EngineVersion:EngineVersion}' | grep -A 2 '"Engine": "mysql"'
 
 resource "aws_db_instance" "master" {
-  identifier                      = var.identifier
-  engine                          = var.engine
-  engine_version                  = var.engine_version
-  port                            = var.port
-  db_name                         = var.db_name
-  username                        = var.username
-  password                        = random_password.root_password.result
-  instance_class                  = var.instance_class
-  allocated_storage               = var.allocated_storage
-  max_allocated_storage           = var.max_allocated_storage
-  storage_type                    = var.storage_type
-  storage_encrypted               = var.storage_encrypted
-  replicate_source_db             = var.replicate_source_db
-  multi_az                        = var.multi_az
-  skip_final_snapshot             = true
-  copy_tags_to_snapshot           = false
-  publicly_accessible             = false
-  license_model                   = var.license_model
-  db_subnet_group_name            = try(aws_db_subnet_group.this[0].id, null)
-  vpc_security_group_ids          = ["${aws_security_group.db_instance_sg.id}"]
-  parameter_group_name            = try(aws_db_parameter_group.this[0].id, null)
-  option_group_name               = try(aws_db_option_group.this[0].id, null)
-  apply_immediately               = var.apply_immediately
-  auto_minor_version_upgrade      = var.auto_minor_version_upgrade
-  backup_window                   = var.backup_window
+  identifier                 = var.identifier
+  engine                     = var.engine
+  engine_version             = var.engine_version
+  port                       = var.port
+  db_name                    = var.db_name
+  username                   = var.username
+  password                   = random_password.root_password.result
+  instance_class             = var.instance_class
+  allocated_storage          = var.allocated_storage
+  max_allocated_storage      = var.max_allocated_storage
+  storage_type               = var.storage_type
+  storage_encrypted          = var.storage_encrypted
+  replicate_source_db        = var.replicate_source_db
+  multi_az                   = var.multi_az
+  skip_final_snapshot        = true
+  copy_tags_to_snapshot      = false
+  publicly_accessible        = false
+  license_model              = var.license_model
+  db_subnet_group_name       = try(aws_db_subnet_group.this[0].id, null)
+  vpc_security_group_ids     = ["${aws_security_group.db_instance_sg.id}"]
+  parameter_group_name       = try(aws_db_parameter_group.this[0].id, null)
+  option_group_name          = try(aws_db_option_group.this[0].id, null)
+  apply_immediately          = var.apply_immediately
+  auto_minor_version_upgrade = var.auto_minor_version_upgrade
+  backup_window              = var.backup_window
   # Backups are required in order to create a replica. backup_retention_period should be grater than 0. Default value is 0.
   backup_retention_period         = var.backup_retention_period
   maintenance_window              = var.maintenance_window
   deletion_protection             = var.deletion_protection
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
- 
+
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention_period : null
   performance_insights_kms_key_id       = var.performance_insights_enabled ? var.performance_insights_kms_key_id : null
-  
-  tags  =  {
+
+  tags = {
     Name = var.identifier
   }
 
@@ -219,7 +219,7 @@ data "aws_iam_policy_document" "enhanced_monitoring" {
     ]
 
     effect = "Allow"
-    
+
     principals {
       type        = "Service"
       identifiers = ["monitoring.rds.amazonaws.com"]
@@ -234,8 +234,8 @@ resource "aws_iam_role" "enhanced_monitoring" {
   assume_role_policy = data.aws_iam_policy_document.enhanced_monitoring.json
 
   tags = {
-      "Name" = var.monitoring_role_name
-    }
+    "Name" = var.monitoring_role_name
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "enhanced_monitoring" {
@@ -253,26 +253,26 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring" {
 resource "aws_db_instance" "replica" {
   count = var.create_db_instance_replica ? 1 : 0
 
-  identifier                      = "${var.identifier}-replica"
+  identifier = "${var.identifier}-replica"
   # some issues with AWS TF Provider: https://github.com/hashicorp/terraform-provider-aws/pull/25439
   # engine and engine_version can not be specified for replica instance
   # engine                          = var.engine
   # engine_version                  = var.engine_version
-  port                            = var.port
+  port = var.port
 
   # Username and password should not be set for replicas
-  username                        = null
-  password                        = null
-  
-  availability_zone               = "${var.region}b"
-  instance_class                  = var.instance_class
-  allocated_storage               = var.allocated_storage
-  max_allocated_storage           = var.max_allocated_storage
-  storage_type                    = var.storage_type
-  storage_encrypted               = var.storage_encrypted
+  username = null
+  password = null
+
+  availability_zone     = "${var.region}b"
+  instance_class        = var.instance_class
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
+  storage_type          = var.storage_type
+  storage_encrypted     = var.storage_encrypted
 
   # Source database. For cross-region use db_instance_arn
-  replicate_source_db             = aws_db_instance.master.id
+  replicate_source_db = aws_db_instance.master.id
 
   multi_az                        = false
   skip_final_snapshot             = true
@@ -290,13 +290,13 @@ resource "aws_db_instance" "replica" {
   maintenance_window              = var.maintenance_window
   deletion_protection             = var.deletion_protection
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
-  
+
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention_period : null
   performance_insights_kms_key_id       = var.performance_insights_enabled ? var.performance_insights_kms_key_id : null
 
 
-  tags  =  {
+  tags = {
     Name = var.identifier
   }
 

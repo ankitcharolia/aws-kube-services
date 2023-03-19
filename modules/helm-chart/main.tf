@@ -21,7 +21,7 @@ resource "helm_release" "this" {
   ]
 
   dynamic "set" {
-  #  for_each = can(each.value.values) ? each.value.values : []
+    #  for_each = can(each.value.values) ? each.value.values : []
     for_each = try(each.value.values, [])
     content {
       name  = set.key
@@ -36,7 +36,7 @@ data "kubernetes_service" "nginx_ingress_controller" {
     name      = "ingress-nginx-controller"
     namespace = "ingress-nginx"
   }
-  depends_on  = [
+  depends_on = [
     helm_release.this["argo-apps"]
   ]
 }
