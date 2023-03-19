@@ -41,9 +41,9 @@ public_zone_nameservers = {
 
 public_zone_aliases = [
     {
-        "name"          = "cloud-storage"
-        "alias_zone_id" = "Z215JYRZR1TBD5"
-        "alias_name"    = "elb-ffm-dev-1741466132.eu-central-1.elb.amazonaws.com."
+        "name"          = "game-2048"
+        "alias_zone_id" = "Z32O12XQLNTSW2"
+        "alias_name"    = "k8s-default-ingress2-f96b340a61-1160930637.eu-west-1.elb.amazonaws.com"
         "type"          = "A"
     }
 ]

@@ -63,7 +63,7 @@ resource "aws_route53_record" "private_alias" {
   alias {
     name                   = each.value.alias_name
     zone_id                = try(each.value.alias_zone_id, aws_route53_zone.private.zone_id)
-    evaluate_target_health = true
+    evaluate_target_health = false
   }
 }
 
