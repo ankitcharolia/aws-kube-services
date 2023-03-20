@@ -4,7 +4,7 @@ metadata:
   name: argocd-vsvc
 spec:
   gateways:
-    - istio-ingress/gateway
+    - istio-ingress/gateway  # namespace/<gateway_name>
   hosts:
     - "argocd.${domain}"
   http:
