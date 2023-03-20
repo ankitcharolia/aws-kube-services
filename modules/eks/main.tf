@@ -163,11 +163,12 @@ resource "aws_security_group_rule" "nodes_cluster_inbound" {
 
 # install AWS EKS add-ons
 resource "aws_eks_addon" "this" {
-  for_each = var.aws_eks_addons
+  for_each = { for addon in var.aws_eks_addons : addon.name => addon }
 
   cluster_name      = aws_eks_cluster.this.name
-  addon_name        = each.value
-  resolve_conflicts = "NONE"
+  addon_name        = each.value.name
+  addon_version     = each.value.version
+  resolve_conflicts = "OVERWRITE"
 }
 
 # Enabling IAM Roles for Service Accounts in Kubernetes cluster

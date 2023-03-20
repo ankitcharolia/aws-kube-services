@@ -216,5 +216,5 @@ variable "eks_node_groups" {
 }
 
 variable "aws_eks_addons" {
-  type = set(string)
+  type = list(any)
 }

@@ -214,7 +214,16 @@ eks_node_groups = [
 ]
 
 aws_eks_addons = [
-  "coredns",
-  "vpc-cni",
-  "kube-proxy"
+  {
+    name    = "vpc-cni"
+    version = "v1.12.5-eksbuild.2"
+  },
+  {
+    name    = "coredns"
+    version = "v1.9.3-eksbuild.2"
+  },
+  {
+    name    = "kube-proxy"
+    version = "v1.25.6-eksbuild.2"
+  }
 ]

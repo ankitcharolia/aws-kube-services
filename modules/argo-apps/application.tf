@@ -40,7 +40,6 @@ resource "kubectl_manifest" "argocd_application" {
   })
 
   ignore_fields = [
-    "spec",
     "metadata.annotations",
     "status",
     "metadata.finalizers",

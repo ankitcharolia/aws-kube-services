@@ -7,34 +7,38 @@ terraform {
   }
 }
 
+data "aws_iam_policy_document" "cert_manager" {
+  statement {
+    actions = [
+      "route53:GetChange",
+    ]
+    resources = ["arn:aws:route53:::change/*"]
+    effect    = "Allow"
+  }
+
+  statement {
+    actions = [
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
+    ]
+    resources = ["arn:aws:route53:::hostedzone/*"]
+    effect    = "Allow"
+  }
+
+  statement {
+    actions = [
+      "route53:ListHostedZonesByName",
+    ]
+    resources = ["*"]
+    effect    = "Allow"
+  }
+}
+
 resource "aws_iam_policy" "cert_manager_policy" {
   name        = "cert-manager-policy"
   path        = "/"
   description = "Policy, which allows CertManager to create Route53 records"
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : "route53:GetChange",
-        "Resource" : "arn:aws:route53:::change/*"
-      },
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "route53:ChangeResourceRecordSets",
-          "route53:ListResourceRecordSets"
-        ],
-        "Resource" : "arn:aws:route53:::hostedzone/*"
-      },
-      {
-        "Effect" : "Allow",
-        "Action" : "route53:ListHostedZonesByName",
-        "Resource" : "*"
-      }
-    ]
-  })
+  policy      = data.aws_iam_policy_document.cert_manager.json
 }
 
 # AWS Authentication using IAM Role based Service Account 
