@@ -173,7 +173,7 @@ rds_instances = [
 # AWS EKS Config
 # --------------------------------------------------------------------------------
 
-kubernetes_version = "1.24"
+kubernetes_version = "1.25"
 eks_node_groups = [
   {
     node_group_name = "main"
