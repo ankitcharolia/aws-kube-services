@@ -19,6 +19,12 @@ argo-cd-redis-ha-server-2                                   4/4     Running   0 
 ```
 
 ```shell
+acharolia@ankitcharolia:~/review/kube-services$ kubectl get svc -n istio-ingress 
+NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP                                                              PORT(S)                                      AGE
+istio-ingressgateway   LoadBalancer   172.20.56.16   ace6578e04fdc4ddeae32e6cc949af93-933259602.eu-west-1.elb.amazonaws.com   15021:31853/TCP,80:31437/TCP,443:32291/TCP   2d1h
+```
+
+```shell
 acharolia@ankitcharolia:~$ kubectl get virtualservices.networking.istio.io -n argocd
 NAME          GATEWAYS                    HOSTS                         AGE
 argocd-vsvc   ["istio-ingress/gateway"]   ["argocd.public.local.com"]   18m

@@ -58,6 +58,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     ...
     ...
+    alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/actions.ssl-redirect: |
       {
@@ -77,3 +78,4 @@ metadata:
 
 * [Official AWS Loadbalancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/annotations/)
 
+* [EKS + ALB Example](https://rtfm.co.ua/en/aws-elastic-kubernetes-service-running-alb-ingress-controller/)

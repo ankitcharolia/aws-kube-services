@@ -1,0 +1,137 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deploy
+  namespace: default
+  labels:
+    app: test-app
+    version: v1
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+        version: v1
+    spec: 
+      containers:
+      - name: web
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 150m
+            memory: 200Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-svc
+  namespace: default
+spec:   
+  selector:
+    app: test-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: alb-istio-gateway
+  namespace: istio-ingress
+spec:
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - "*"
+      port:
+        name: https
+        number: 443
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: tls-secret
+    - hosts:
+        - "*"
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+      tls:
+        httpsRedirect: false
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-virtualservice
+  namespace: default
+spec: 
+  hosts:
+  - "nginx.public.local.com"
+  gateways:
+  - istio-ingress/alb-istio-gateway
+  http:
+  - match: 
+    - uri:   
+        prefix: /
+    route:
+    - destination:
+        host: test-svc
+        port:
+          number: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: istio-ingress
+  name: ingress-nginx
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    # healthcheck-path: kubectl get po -n istio-ingress istio-ingressgateway-685fcc78c-8nz8f -o yaml
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz/ready
+    # healthcheck-port: kubectl get svc -n istio-ingress istio-ingressgateway -o yaml
+    alb.ingress.kubernetes.io/healthcheck-port: status-port
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/tags: Environment=stage,Team=devops
+
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: istio-ingressgateway
+              port:
+                number: 80
+        - path: /healthz/ready
+          pathType: Prefix
+          backend:
+            service:
+              name: istio-ingressgateway
+              port:
+                number: 15021
