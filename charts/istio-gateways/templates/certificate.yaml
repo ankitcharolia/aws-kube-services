@@ -16,6 +16,7 @@ spec:
       - COVAXIN
   usages:
     - server auth
+    - client auth
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
