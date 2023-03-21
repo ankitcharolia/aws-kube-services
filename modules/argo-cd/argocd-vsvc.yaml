@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   gateways:
-    - istio-ingress/gateway  # namespace/<gateway_name>
+    - istio-ingress/alb-istio-gateway  # namespace/<gateway_name>
   hosts:
     - "argocd.${domain}"
   http:
