@@ -101,7 +101,6 @@ module "istio_gateways" {
     domainName = var.public_zone_name
   }
 
-
   depends_on = [
     module.argocd,
   ]

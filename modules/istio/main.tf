@@ -68,6 +68,22 @@ module "istio_ingressgateway" {
   ]
 }
 
+# For application pods in the Istio service mesh, all traffic to/from the pods needs to go through the sidecar proxies (istio-proxy containers).
+# This istio-cni Container Network Interface (CNI) plugin will set up the pods' networking to fulfill this requirement in place of the current Istio injected pod initContainers istio-init approach.
+module "istio_cni" {
+
+  source          = "../argo-apps"
+  name            = "istio-cni"
+  chart           = "cni"
+  namespace       = "kube-system"  # Installation in kube-system is recommended to ensure the  priorityClassName can be used.
+  repo_url        = "https://istio-release.storage.googleapis.com/charts"
+  target_revision = var.target_revision
+
+  depends_on = [
+    module.istiod,
+  ]
+}
+
 # Hide server response header
 resource "kubectl_manifest" "external_secrets" {
 
