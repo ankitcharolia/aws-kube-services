@@ -31,7 +31,7 @@ minikube start --kubernetes-version=v1.24.0 --memory=8g --bootstrapper=kubeadm -
 
 * [Istio Network Policy Example](https://repo1.dso.mil/big-bang/product/packages/istio-controlplane/-/tree/main/chart)
 
-
+* [Isto-CNI explained](https://www.redhat.com/architect/istio-CNI-plugin)
 
 #### SEE THIS
 * [Use AWS ALB ingress controller for kube services](https://rtfm.co.ua/en/aws-elastic-kubernetes-service-running-alb-ingress-controller/)
